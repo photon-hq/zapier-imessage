@@ -12,6 +12,7 @@ Official Zapier integration for the [Photon](https://github.com/photon-hq) iMess
 
 ```bash
 npm install
+npm run build
 zapier login
 zapier push
 ```
@@ -36,7 +37,25 @@ When connecting the app in Zapier, provide:
 ## Development
 
 ```bash
-npm test
+npm install
+npm run build    # compile TypeScript → dist/
+npm test         # build + run Vitest
 zapier validate
 zapier push
+```
+
+## Project Structure
+
+```
+src/
+├── index.ts                 # App entry point (defineApp)
+├── authentication.ts        # Custom auth (Server URL + API Key)
+├── triggers/
+│   └── newMessage.ts        # New Message Received (polling)
+├── creates/
+│   ├── sendMessage.ts       # Send Message
+│   ├── scheduleMessage.ts   # Schedule a Message
+│   └── reactMessage.ts      # React to Message
+└── searches/
+    └── findMessages.ts      # Find Messages
 ```
