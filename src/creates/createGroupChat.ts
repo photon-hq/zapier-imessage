@@ -59,7 +59,8 @@ const perform = (async (z, bundle) => {
     },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.guid || data.id || `group-${Date.now()}`, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -75,9 +76,15 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "iMessage;+;chat123456789",
       guid: "iMessage;+;chat123456789",
       displayName: "New Group",
       participants: ["+1234567890", "+0987654321"],
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "guid", label: "Chat GUID" },
+      { key: "displayName", label: "Display Name" },
+    ],
   },
 });

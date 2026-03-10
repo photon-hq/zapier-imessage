@@ -11,6 +11,7 @@ const inputFields = defineInputFields([
     type: "string",
     required: true,
     helpText: "The group chat GUID, e.g. iMessage;+;chat123",
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "displayName",
@@ -28,7 +29,8 @@ const perform = (async (z, bundle) => {
     body: { displayName: bundle.inputData.displayName },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.guid || data.id || bundle.inputData.chatGuid, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -44,8 +46,14 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "iMessage;+;chat123",
       guid: "iMessage;+;chat123",
       displayName: "New Group Name",
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "guid", label: "Chat GUID" },
+      { key: "displayName", label: "Display Name" },
+    ],
   },
 });

@@ -33,7 +33,8 @@ const perform = (async (z, bundle) => {
     },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.id || bundle.inputData.messageGuid, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -49,8 +50,14 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "unsend-1234",
       status: 200,
       message: "Message unsent successfully",
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "status", label: "Status", type: "integer" },
+      { key: "message", label: "Message" },
+    ],
   },
 });

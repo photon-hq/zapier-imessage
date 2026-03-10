@@ -12,6 +12,7 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "imageUrl",
@@ -37,7 +38,8 @@ const perform = (async (z, bundle) => {
     body: { fileData: base64 },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.id || bundle.inputData.chatGuid, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -53,8 +55,14 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "background-1234",
       status: 200,
       message: "Background set successfully",
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "status", label: "Status", type: "integer" },
+      { key: "message", label: "Message" },
+    ],
   },
 });

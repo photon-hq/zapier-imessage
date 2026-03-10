@@ -12,6 +12,7 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "messageGuid",
@@ -49,7 +50,8 @@ const perform = (async (z, bundle) => {
     },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.guid || data.id || `${bundle.inputData.messageGuid}-${bundle.inputData.reaction}`, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -65,8 +67,14 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "reaction-1234",
       status: 200,
       message: "Reaction sent successfully",
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "status", label: "Status", type: "integer" },
+      { key: "message", label: "Message" },
+    ],
   },
 });

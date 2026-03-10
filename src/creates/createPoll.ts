@@ -12,6 +12,7 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "title",
@@ -47,7 +48,8 @@ const perform = (async (z, bundle) => {
     },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.guid || data.id || `poll-${Date.now()}`, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -63,9 +65,15 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "p:0/fake-poll-guid",
       guid: "p:0/fake-poll-guid",
       text: "What should we do?",
       ballotItems: ["Option A", "Option B", "Option C"],
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "guid", label: "GUID" },
+      { key: "text", label: "Poll Question" },
+    ],
   },
 });

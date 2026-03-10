@@ -51,7 +51,8 @@ const perform = (async (z, bundle) => {
     },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.guid || data.id || bundle.inputData.messageGuid, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -67,9 +68,16 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "p:0/fake-guid-1234",
       guid: "p:0/fake-guid-1234",
       text: "Edited message text",
       dateEdited: 1700000000000,
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "guid", label: "GUID" },
+      { key: "text", label: "Text" },
+      { key: "dateEdited", label: "Date Edited", type: "integer" },
+    ],
   },
 });
