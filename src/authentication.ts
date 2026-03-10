@@ -8,6 +8,12 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   _z,
   bundle,
 ) => {
+  const serverUrl = (bundle.authData.serverUrl as string || "").replace(/\/+$/, "");
+
+  if (request.url) {
+    request.url = request.url.replace(bundle.authData.serverUrl as string, serverUrl);
+  }
+
   request.headers = {
     ...request.headers,
     "X-API-Key": bundle.authData.apiKey as string,
@@ -36,20 +42,9 @@ export default {
         "Go to your [Photon iMessage Server Dashboard](https://docs.photon.sh) to find your API Key.",
     },
   ],
-  test: async (z: any, bundle: any) => {
-    const serverUrl = bundle.authData.serverUrl as string;
-
-    if (!/^https:\/\/[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(serverUrl)) {
-      throw new z.errors.Error(
-        "Server URL must be a valid HTTPS URL (e.g. https://abc.example.com).",
-      );
-    }
-
-    const response = await z.request({
-      url: `${serverUrl}/api/v1/server/info`,
-      method: "GET",
-    });
-    return response.data;
+  test: {
+    url: "{{bundle.authData.serverUrl}}/api/v1/server/info",
+    method: "GET",
   },
   connectionLabel: "{{bundle.authData.serverUrl}}",
 } satisfies Authentication;
