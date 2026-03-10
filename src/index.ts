@@ -23,6 +23,9 @@ import markChatRead from "./creates/markChatRead.js";
 import startTyping from "./creates/startTyping.js";
 import createPoll from "./creates/createPoll.js";
 import votePoll from "./creates/votePoll.js";
+import shareContactCard from "./creates/shareContactCard.js";
+import setChatBackground from "./creates/setChatBackground.js";
+import setGroupIcon from "./creates/setGroupIcon.js";
 import findMessages from "./searches/findMessages.js";
 import getChats from "./searches/getChats.js";
 import getChatParticipants from "./searches/getChatParticipants.js";
@@ -77,6 +80,9 @@ export default defineApp({
     [startTyping.key]: startTyping,
     [createPoll.key]: createPoll,
     [votePoll.key]: votePoll,
+    [shareContactCard.key]: shareContactCard,
+    [setChatBackground.key]: setChatBackground,
+    [setGroupIcon.key]: setGroupIcon,
   },
 
   searches: {
