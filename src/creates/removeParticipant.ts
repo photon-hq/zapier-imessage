@@ -1,0 +1,52 @@
+import {
+  defineCreate,
+  defineInputFields,
+  type CreatePerform,
+} from "zapier-platform-core";
+
+const inputFields = defineInputFields([
+  {
+    key: "chatGuid",
+    label: "Chat GUID",
+    type: "string",
+    required: true,
+    helpText: "The group chat GUID, e.g. iMessage;+;chat123",
+  },
+  {
+    key: "address",
+    label: "Participant Address",
+    type: "string",
+    required: true,
+    helpText: "Phone number or email to remove, e.g. +1234567890",
+  },
+]);
+
+const perform = (async (z, bundle) => {
+  const response = await z.request({
+    url: `${bundle.authData.serverUrl}/api/v1/chat/${encodeURIComponent(bundle.inputData.chatGuid)}/participant/remove`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: { address: bundle.inputData.address },
+  });
+
+  return response.data;
+}) satisfies CreatePerform<typeof inputFields>;
+
+export default defineCreate({
+  key: "remove_participant",
+  noun: "Participant",
+
+  display: {
+    label: "Remove Participant from Group",
+    description: "Remove a participant from an iMessage group chat.",
+  },
+
+  operation: {
+    inputFields,
+    perform,
+    sample: {
+      status: 200,
+      message: "Participant removed successfully",
+    },
+  },
+});
