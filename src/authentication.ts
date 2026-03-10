@@ -3,15 +3,16 @@ import type {
   BeforeRequestMiddleware,
 } from "zapier-platform-core";
 
+const normalizeUrl = (url: string): string =>
+  (url || "").replace(/\/+$/, "");
+
 export const addApiKeyToHeader: BeforeRequestMiddleware = (
   request,
   _z,
   bundle,
 ) => {
-  const serverUrl = (bundle.authData.serverUrl as string || "").replace(/\/+$/, "");
-
   if (request.url) {
-    request.url = request.url.replace(bundle.authData.serverUrl as string, serverUrl);
+    request.url = request.url.replace(/(https?:\/\/)\/*/g, "$1").replace(/([^:])\/+/g, "$1/");
   }
 
   request.headers = {
@@ -21,7 +22,7 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   return request;
 };
 
-export default {
+const authentication: Authentication = {
   type: "custom",
   fields: [
     {
@@ -47,4 +48,6 @@ export default {
     method: "GET",
   },
   connectionLabel: "{{bundle.authData.serverUrl}}",
-} satisfies Authentication;
+};
+
+export default authentication;
