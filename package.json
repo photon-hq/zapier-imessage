@@ -1,0 +1,16 @@
+{
+  "name": "zapier-imessage",
+  "version": "1.0.0",
+  "description": "Zapier integration for Photon iMessage server",
+  "main": "index.js",
+  "scripts": {
+    "test": "zapier test"
+  },
+  "dependencies": {
+    "zapier-platform-core": "16.x"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "license": "MIT"
+}
