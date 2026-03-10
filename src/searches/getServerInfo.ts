@@ -1,7 +1,19 @@
 import {
   defineSearch,
+  defineInputFields,
   type SearchPerform,
 } from "zapier-platform-core";
+
+const inputFields = defineInputFields([
+  {
+    key: "placeholder",
+    label: "Fetch Server Info",
+    type: "string",
+    required: false,
+    default: "yes",
+    helpText: "No input needed — this fetches your server's current status.",
+  },
+]);
 
 const perform = (async (z, bundle) => {
   const response = await z.request<Record<string, unknown>>({
@@ -21,7 +33,7 @@ const perform = (async (z, bundle) => {
       detectedIcloud: info.detected_icloud,
     },
   ];
-}) satisfies SearchPerform;
+}) satisfies SearchPerform<typeof inputFields>;
 
 export default defineSearch({
   key: "get_server_info",
@@ -33,6 +45,7 @@ export default defineSearch({
   },
 
   operation: {
+    inputFields,
     perform,
     sample: {
       id: "server-info",

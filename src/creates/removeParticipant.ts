@@ -37,7 +37,7 @@ export default defineCreate({
   noun: "Participant",
 
   display: {
-    label: "Remove Participant from Group",
+    label: "Remove Participant From Group",
     description: "Remove a participant from an iMessage group chat.",
   },
 
