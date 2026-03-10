@@ -11,6 +11,7 @@ const inputFields = defineInputFields([
     type: "string",
     required: true,
     helpText: "The group chat GUID, e.g. iMessage;+;chat123",
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "imageUrl",
@@ -36,7 +37,8 @@ const perform = (async (z, bundle) => {
     body: { fileData: base64 },
   });
 
-  return response.data;
+  const data = response.data as Record<string, unknown>;
+  return { id: data.id || bundle.inputData.chatGuid, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -52,8 +54,14 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
+      id: "icon-1234",
       status: 200,
       message: "Group icon set successfully",
     },
+    outputFields: [
+      { key: "id", label: "ID" },
+      { key: "status", label: "Status", type: "integer" },
+      { key: "message", label: "Message" },
+    ],
   },
 });

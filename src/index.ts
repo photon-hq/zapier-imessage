@@ -7,6 +7,7 @@ import packageJson from "../package.json" with { type: "json" };
 
 import authentication, { addApiKeyToHeader } from "./authentication.js";
 import newMessage from "./triggers/newMessage.js";
+import listChats from "./triggers/listChats.js";
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
 import reactMessage from "./creates/reactMessage.js";
@@ -54,6 +55,10 @@ export default defineApp({
   version: packageJson.version,
   platformVersion,
 
+  flags: {
+    cleanInputData: false,
+  },
+
   authentication,
 
   beforeRequest: [addApiKeyToHeader],
@@ -61,6 +66,7 @@ export default defineApp({
 
   triggers: {
     [newMessage.key]: newMessage,
+    [listChats.key]: listChats,
   },
 
   creates: {

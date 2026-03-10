@@ -24,7 +24,7 @@ export default {
       type: "string",
       required: true,
       helpText:
-        "Your Photon iMessage server URL, e.g. https://abc.example.com",
+        "Your Photon iMessage server URL, e.g. `https://abc.example.com`",
     },
     {
       key: "apiKey",
@@ -32,11 +32,24 @@ export default {
       type: "string",
       required: true,
       computed: false,
+      helpText:
+        "Go to your [Photon iMessage Server Dashboard](https://docs.photon.sh) to find your API Key.",
     },
   ],
-  test: {
-    url: "{{bundle.authData.serverUrl}}/api/v1/server/info",
-    method: "GET",
+  test: async (z: any, bundle: any) => {
+    const serverUrl = bundle.authData.serverUrl as string;
+
+    if (!/^https:\/\/[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(serverUrl)) {
+      throw new z.errors.Error(
+        "Server URL must be a valid HTTPS URL (e.g. https://abc.example.com).",
+      );
+    }
+
+    const response = await z.request({
+      url: `${serverUrl}/api/v1/server/info`,
+      method: "GET",
+    });
+    return response.data;
   },
   connectionLabel: "{{bundle.authData.serverUrl}}",
 } satisfies Authentication;

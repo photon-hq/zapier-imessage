@@ -24,6 +24,7 @@ const inputFields = defineInputFields([
     label: "Chat GUID (optional)",
     type: "string",
     required: false,
+    dynamic: "list_chats.id.displayName",
   },
   {
     key: "limit",

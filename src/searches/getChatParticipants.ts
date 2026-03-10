@@ -11,6 +11,7 @@ const inputFields = defineInputFields([
     type: "string",
     required: true,
     helpText: "The chat GUID, e.g. iMessage;+;chat123 for a group",
+    dynamic: "list_chats.id.displayName",
   },
 ]);
 
