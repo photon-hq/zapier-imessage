@@ -1,0 +1,83 @@
+import {
+  defineCreate,
+  defineInputFields,
+  type CreatePerform,
+} from "zapier-platform-core";
+
+const inputFields = defineInputFields([
+  {
+    key: "addresses",
+    label: "Participant Addresses",
+    type: "string",
+    required: true,
+    helpText:
+      "Comma-separated phone numbers or emails, e.g. +1234567890,+0987654321",
+  },
+  {
+    key: "message",
+    label: "Initial Message",
+    type: "text",
+    required: false,
+    helpText: "Optional message to send when creating the chat.",
+  },
+  {
+    key: "service",
+    label: "Service",
+    type: "string",
+    required: false,
+    default: "iMessage",
+    choices: { iMessage: "iMessage", SMS: "SMS" },
+  },
+  {
+    key: "method",
+    label: "Send Method",
+    type: "string",
+    required: false,
+    default: "private-api",
+    choices: {
+      "apple-script": "Apple Script",
+      "private-api": "Private API",
+    },
+  },
+]);
+
+const perform = (async (z, bundle) => {
+  const addresses = bundle.inputData.addresses
+    .split(",")
+    .map((a: string) => a.trim())
+    .filter(Boolean);
+
+  const response = await z.request({
+    url: `${bundle.authData.serverUrl}/api/v1/chat/new`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: {
+      addresses,
+      message: bundle.inputData.message || undefined,
+      service: bundle.inputData.service || "iMessage",
+      method: bundle.inputData.method || "private-api",
+    },
+  });
+
+  return response.data;
+}) satisfies CreatePerform<typeof inputFields>;
+
+export default defineCreate({
+  key: "create_group_chat",
+  noun: "Group Chat",
+
+  display: {
+    label: "Create Group Chat",
+    description: "Create a new iMessage group conversation.",
+  },
+
+  operation: {
+    inputFields,
+    perform,
+    sample: {
+      guid: "iMessage;+;chat123456789",
+      displayName: "New Group",
+      participants: ["+1234567890", "+0987654321"],
+    },
+  },
+});
