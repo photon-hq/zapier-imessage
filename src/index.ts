@@ -21,6 +21,8 @@ import renameGroupChat from "./creates/renameGroupChat.js";
 import deleteChat from "./creates/deleteChat.js";
 import markChatRead from "./creates/markChatRead.js";
 import startTyping from "./creates/startTyping.js";
+import createPoll from "./creates/createPoll.js";
+import votePoll from "./creates/votePoll.js";
 import findMessages from "./searches/findMessages.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
@@ -66,6 +68,8 @@ export default defineApp({
     [deleteChat.key]: deleteChat,
     [markChatRead.key]: markChatRead,
     [startTyping.key]: startTyping,
+    [createPoll.key]: createPoll,
+    [votePoll.key]: votePoll,
   },
 
   searches: {
