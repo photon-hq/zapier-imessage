@@ -10,6 +10,8 @@ import newMessage from "./triggers/newMessage.js";
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
 import reactMessage from "./creates/reactMessage.js";
+import unsendMessage from "./creates/unsendMessage.js";
+import editMessage from "./creates/editMessage.js";
 import findMessages from "./searches/findMessages.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
@@ -44,6 +46,8 @@ export default defineApp({
     [sendMessage.key]: sendMessage,
     [scheduleMessage.key]: scheduleMessage,
     [reactMessage.key]: reactMessage,
+    [unsendMessage.key]: unsendMessage,
+    [editMessage.key]: editMessage,
   },
 
   searches: {
