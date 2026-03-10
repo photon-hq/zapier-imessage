@@ -24,6 +24,13 @@ import startTyping from "./creates/startTyping.js";
 import createPoll from "./creates/createPoll.js";
 import votePoll from "./creates/votePoll.js";
 import findMessages from "./searches/findMessages.js";
+import getChats from "./searches/getChats.js";
+import getChatParticipants from "./searches/getChatParticipants.js";
+import getContacts from "./searches/getContacts.js";
+import checkImessage from "./searches/checkImessage.js";
+import getServerInfo from "./searches/getServerInfo.js";
+import getMessageStats from "./searches/getMessageStats.js";
+import findMyFriends from "./searches/findMyFriends.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
   if (response.status >= 400) {
@@ -74,5 +81,12 @@ export default defineApp({
 
   searches: {
     [findMessages.key]: findMessages,
+    [getChats.key]: getChats,
+    [getChatParticipants.key]: getChatParticipants,
+    [getContacts.key]: getContacts,
+    [checkImessage.key]: checkImessage,
+    [getServerInfo.key]: getServerInfo,
+    [getMessageStats.key]: getMessageStats,
+    [findMyFriends.key]: findMyFriends,
   },
 });
