@@ -38,10 +38,16 @@ import findMyFriends from "./searches/findMyFriends.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
   if (response.status >= 400) {
-    const body =
-      typeof response.data === "string"
-        ? response.data
-        : JSON.stringify(response.data);
+    // Produce a readable body even when response.data is undefined (e.g. the
+    // server returned an empty body or non-JSON for a 4xx response).
+    let body: string;
+    if (typeof response.data === "string") {
+      body = response.data || response.content || "(empty body)";
+    } else if (response.data !== undefined && response.data !== null) {
+      body = JSON.stringify(response.data);
+    } else {
+      body = response.content || "(empty body)";
+    }
     throw new z.errors.Error(
       `API returned ${response.status}: ${body}`,
       "ApiError",
