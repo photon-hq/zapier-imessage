@@ -7,6 +7,7 @@ import packageJson from "../package.json" with { type: "json" };
 
 import authentication, { addApiKeyToHeader } from "./authentication.js";
 import newMessage from "./triggers/newMessage.js";
+import newMessageInstant from "./triggers/newMessageInstant.js";
 import listChats from "./triggers/listChats.js";
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
@@ -72,6 +73,7 @@ export default defineApp({
 
   triggers: {
     [newMessage.key]: newMessage,
+    [newMessageInstant.key]: newMessageInstant,
     [listChats.key]: listChats,
   },
 
