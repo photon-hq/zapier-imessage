@@ -54,9 +54,10 @@ export default defineTrigger({
   noun: "Message",
 
   display: {
-    label: "New Message Received",
+    label: "New Message Received (Polling)",
     description:
-      "Triggers when a new iMessage is received on your Photon iMessage server.",
+      "Triggers when a new iMessage is received on your Photon iMessage server via polling.",
+    hidden: true,
   },
 
   operation: {

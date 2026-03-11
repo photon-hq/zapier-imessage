@@ -123,10 +123,9 @@ const authentication: Authentication = {
       key: "webhookBridgeUrl",
       label: "Webhook Bridge URL",
       type: "string",
-      required: false,
+      required: true,
       helpText:
-        "URL of your Photon Webhook Bridge for instant triggers, e.g. `https://webhook.photon.codes`. " +
-        "Leave blank if you only need polling triggers.",
+        "URL of your Photon Webhook Bridge, e.g. `https://webhook.photon.codes`.",
     },
   ],
   // Use a function perform so we control URL normalisation and error messages.
