@@ -6,9 +6,28 @@ import type { AfterResponseMiddleware } from "zapier-platform-core";
 import packageJson from "../package.json" with { type: "json" };
 
 import authentication, { addApiKeyToHeader } from "./authentication.js";
-import newMessage from "./triggers/newMessage.js";
+
+// Instant (webhook) triggers — primary
 import newMessageInstant from "./triggers/newMessageInstant.js";
+import messageUpdatedInstant from "./triggers/messageUpdatedInstant.js";
+import messageSendErrorInstant from "./triggers/messageSendErrorInstant.js";
+import typingIndicatorInstant from "./triggers/typingIndicatorInstant.js";
+import chatReadStatusInstant from "./triggers/chatReadStatusInstant.js";
+import groupNameChangeInstant from "./triggers/groupNameChangeInstant.js";
+import participantAddedInstant from "./triggers/participantAddedInstant.js";
+import participantRemovedInstant from "./triggers/participantRemovedInstant.js";
+import participantLeftInstant from "./triggers/participantLeftInstant.js";
+import groupIconChangedInstant from "./triggers/groupIconChangedInstant.js";
+import scheduledMessageInstant from "./triggers/scheduledMessageInstant.js";
+import findMyLocationInstant from "./triggers/findMyLocationInstant.js";
+import ftCallStatusInstant from "./triggers/ftCallStatusInstant.js";
+import serverUpdateInstant from "./triggers/serverUpdateInstant.js";
+
+// Polling triggers — secondary / hidden
+import newMessage from "./triggers/newMessage.js";
 import listChats from "./triggers/listChats.js";
+
+// Creates
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
 import reactMessage from "./creates/reactMessage.js";
@@ -28,6 +47,8 @@ import votePoll from "./creates/votePoll.js";
 import shareContactCard from "./creates/shareContactCard.js";
 import setChatBackground from "./creates/setChatBackground.js";
 import setGroupIcon from "./creates/setGroupIcon.js";
+
+// Searches
 import findMessages from "./searches/findMessages.js";
 import getChats from "./searches/getChats.js";
 import getChatParticipants from "./searches/getChatParticipants.js";
@@ -39,8 +60,6 @@ import findMyFriends from "./searches/findMyFriends.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
   if (response.status >= 400) {
-    // Produce a readable body even when response.data is undefined (e.g. the
-    // server returned an empty body or non-JSON for a 4xx response).
     let body: string;
     if (typeof response.data === "string") {
       body = response.data || response.content || "(empty body)";
@@ -72,8 +91,24 @@ export default defineApp({
   afterResponse: [handleErrors],
 
   triggers: {
-    [newMessage.key]: newMessage,
+    // Instant (webhook) triggers — shown to users
     [newMessageInstant.key]: newMessageInstant,
+    [messageUpdatedInstant.key]: messageUpdatedInstant,
+    [messageSendErrorInstant.key]: messageSendErrorInstant,
+    [typingIndicatorInstant.key]: typingIndicatorInstant,
+    [chatReadStatusInstant.key]: chatReadStatusInstant,
+    [groupNameChangeInstant.key]: groupNameChangeInstant,
+    [participantAddedInstant.key]: participantAddedInstant,
+    [participantRemovedInstant.key]: participantRemovedInstant,
+    [participantLeftInstant.key]: participantLeftInstant,
+    [groupIconChangedInstant.key]: groupIconChangedInstant,
+    [scheduledMessageInstant.key]: scheduledMessageInstant,
+    [findMyLocationInstant.key]: findMyLocationInstant,
+    [ftCallStatusInstant.key]: ftCallStatusInstant,
+    [serverUpdateInstant.key]: serverUpdateInstant,
+
+    // Polling fallback (hidden)
+    [newMessage.key]: newMessage,
     [listChats.key]: listChats,
   },
 
