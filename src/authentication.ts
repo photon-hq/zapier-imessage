@@ -119,6 +119,15 @@ const authentication: Authentication = {
       helpText:
         "Go to your [Photon iMessage Server Dashboard](https://docs.photon.sh) to find your API Key.",
     },
+    {
+      key: "webhookBridgeUrl",
+      label: "Webhook Bridge URL",
+      type: "string",
+      required: false,
+      helpText:
+        "URL of your Photon Webhook Bridge for instant triggers, e.g. `https://webhook.photon.codes`. " +
+        "Leave blank if you only need polling triggers.",
+    },
   ],
   // Use a function perform so we control URL normalisation and error messages.
   test: authTest,
