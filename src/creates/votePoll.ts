@@ -3,6 +3,7 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
+import { requireInboundMessage } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -31,6 +32,7 @@ const inputFields = defineInputFields([
 ]);
 
 const perform = (async (z, bundle) => {
+  await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
   const response = await z.request({
     url: `${bundle.authData.serverUrl}/api/v1/poll/vote`,
     method: "POST",

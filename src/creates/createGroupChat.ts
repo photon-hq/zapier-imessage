@@ -3,6 +3,7 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
+import { requireInboundForAddresses } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -46,6 +47,8 @@ const perform = (async (z, bundle) => {
     .split(",")
     .map((a: string) => a.trim())
     .filter(Boolean);
+
+  await requireInboundForAddresses(z, bundle, addresses);
 
   const response = await z.request({
     url: `${bundle.authData.serverUrl}/api/v1/chat/new`,
