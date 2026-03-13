@@ -27,7 +27,7 @@ export default defineTrigger({
   noun: "Error",
 
   display: {
-    label: "Message Send Error (Instant)",
+    label: "Message Send Error",
     description:
       "Triggers when an iMessage fails to send on your Photon server.",
   },

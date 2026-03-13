@@ -1,6 +1,6 @@
 import { defineTrigger } from "zapier-platform-core";
 import type { ZObject, Bundle } from "zapier-platform-core";
-import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
+import { subscribe, unsubscribe, assertValidSignature } from "./webhookHelpers.js";
 
 const performList = async (_z: ZObject, _bundle: Bundle) => [
   {
@@ -22,10 +22,9 @@ const SCHEDULED_EVENTS = new Set([
   "scheduled-message-error",
 ]);
 
-const perform = async (
-  _z: import("zapier-platform-core").ZObject,
-  bundle: import("zapier-platform-core").Bundle,
-) => {
+const perform = async (z: ZObject, bundle: Bundle) => {
+  assertValidSignature(z, bundle);
+
   const payload = bundle.cleanedRequest as {
     event?: string;
     data?: Record<string, unknown>;
@@ -56,7 +55,7 @@ export default defineTrigger({
   noun: "Scheduled Message",
 
   display: {
-    label: "Scheduled Message Event (Instant)",
+    label: "Scheduled Message Event",
     description:
       "Triggers when a scheduled message is created, updated, sent, deleted, or errors on your Photon server.",
   },

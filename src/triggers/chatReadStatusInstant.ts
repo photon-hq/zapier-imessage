@@ -21,7 +21,7 @@ export default defineTrigger({
   noun: "Read Status",
 
   display: {
-    label: "Chat Read Status Changed (Instant)",
+    label: "Chat Read Status Changed",
     description:
       "Triggers when a chat's read status changes on your Photon server.",
   },

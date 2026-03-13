@@ -7,7 +7,7 @@ import packageJson from "../package.json" with { type: "json" };
 
 import authentication, { addApiKeyToHeader } from "./authentication.js";
 
-// Instant (webhook) triggers — primary
+// Webhook (instant) triggers
 import newMessageInstant from "./triggers/newMessageInstant.js";
 import messageUpdatedInstant from "./triggers/messageUpdatedInstant.js";
 import messageSendErrorInstant from "./triggers/messageSendErrorInstant.js";
@@ -23,8 +23,7 @@ import findMyLocationInstant from "./triggers/findMyLocationInstant.js";
 import ftCallStatusInstant from "./triggers/ftCallStatusInstant.js";
 import serverUpdateInstant from "./triggers/serverUpdateInstant.js";
 
-// Polling triggers — secondary / hidden
-import newMessage from "./triggers/newMessage.js";
+// Hidden triggers for dynamic dropdowns
 import listChats from "./triggers/listChats.js";
 
 // Creates
@@ -91,7 +90,6 @@ export default defineApp({
   afterResponse: [handleErrors],
 
   triggers: {
-    // Instant (webhook) triggers — shown to users
     [newMessageInstant.key]: newMessageInstant,
     [messageUpdatedInstant.key]: messageUpdatedInstant,
     [messageSendErrorInstant.key]: messageSendErrorInstant,
@@ -106,9 +104,6 @@ export default defineApp({
     [findMyLocationInstant.key]: findMyLocationInstant,
     [ftCallStatusInstant.key]: ftCallStatusInstant,
     [serverUpdateInstant.key]: serverUpdateInstant,
-
-    // Polling fallback (hidden)
-    [newMessage.key]: newMessage,
     [listChats.key]: listChats,
   },
 

@@ -27,7 +27,7 @@ export default defineTrigger({
   noun: "Location",
 
   display: {
-    label: "Find My Location Updated (Instant)",
+    label: "Find My Location Updated",
     description:
       "Triggers when a Find My Friends location is updated on your Photon server.",
   },

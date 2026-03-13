@@ -22,7 +22,7 @@ export default defineTrigger({
   noun: "Participant",
 
   display: {
-    label: "Participant Left (Instant)",
+    label: "Participant Left",
     description:
       "Triggers when a participant leaves a group chat on your Photon server.",
   },
