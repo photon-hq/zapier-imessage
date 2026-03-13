@@ -23,9 +23,6 @@ import findMyLocationInstant from "./triggers/findMyLocationInstant.js";
 import ftCallStatusInstant from "./triggers/ftCallStatusInstant.js";
 import serverUpdateInstant from "./triggers/serverUpdateInstant.js";
 
-// Hidden triggers for dynamic dropdowns
-import listChats from "./triggers/listChats.js";
-
 // Creates
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
@@ -104,7 +101,6 @@ export default defineApp({
     [findMyLocationInstant.key]: findMyLocationInstant,
     [ftCallStatusInstant.key]: ftCallStatusInstant,
     [serverUpdateInstant.key]: serverUpdateInstant,
-    [listChats.key]: listChats,
   },
 
   creates: {

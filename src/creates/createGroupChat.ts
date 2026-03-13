@@ -21,25 +21,6 @@ const inputFields = defineInputFields([
     required: false,
     helpText: "Optional message to send when creating the chat.",
   },
-  {
-    key: "service",
-    label: "Service",
-    type: "string",
-    required: false,
-    default: "iMessage",
-    choices: { iMessage: "iMessage", SMS: "SMS" },
-  },
-  {
-    key: "method",
-    label: "Send Method",
-    type: "string",
-    required: false,
-    default: "private-api",
-    choices: {
-      "apple-script": "Apple Script",
-      "private-api": "Private API",
-    },
-  },
 ]);
 
 const perform = (async (z, bundle) => {
@@ -57,8 +38,8 @@ const perform = (async (z, bundle) => {
     body: {
       addresses,
       message: bundle.inputData.message || undefined,
-      service: bundle.inputData.service || "iMessage",
-      method: bundle.inputData.method || "private-api",
+      service: "iMessage",
+      method: "private-api",
     },
   });
 

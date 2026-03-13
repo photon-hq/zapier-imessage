@@ -14,24 +14,12 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
-    dynamic: "list_chats.id.displayName",
   },
   {
     key: "message",
     label: "Message Text",
     type: "text",
     required: true,
-  },
-  {
-    key: "method",
-    label: "Send Method",
-    type: "string",
-    required: false,
-    default: "apple-script",
-    choices: {
-      "apple-script": "Apple Script",
-      "private-api": "Private API",
-    },
   },
   {
     key: "subject",
@@ -41,10 +29,26 @@ const inputFields = defineInputFields([
   },
   {
     key: "effectId",
-    label: "Message Effect ID",
+    label: "Message Effect",
     type: "string",
     required: false,
-    helpText: "e.g. com.apple.messages.effect.CKConfettiEffect",
+    helpText: "Optional bubble or screen effect to apply to the message.",
+    choices: {
+      "": "None",
+      "com.apple.messages.effect.CKConfettiEffect": "Confetti",
+      "com.apple.messages.effect.CKFireworksEffect": "Fireworks",
+      "com.apple.messages.effect.CKBalloonEffect": "Balloons",
+      "com.apple.messages.effect.CKHeartEffect": "Hearts",
+      "com.apple.messages.effect.CKHappyBirthdayEffect": "Lasers",
+      "com.apple.messages.effect.CKShootingStarEffect": "Shooting Star",
+      "com.apple.messages.effect.CKSparklesEffect": "Sparkles",
+      "com.apple.messages.effect.CKEchoEffect": "Echo",
+      "com.apple.messages.effect.CKSpotlightEffect": "Spotlight",
+      "com.apple.MobileSMS.expressivesend.gentle": "Gentle",
+      "com.apple.MobileSMS.expressivesend.loud": "Loud",
+      "com.apple.MobileSMS.expressivesend.impact": "Slam",
+      "com.apple.MobileSMS.expressivesend.invisibleink": "Invisible Ink",
+    },
   },
 ]);
 
@@ -57,7 +61,7 @@ const perform = (async (z, bundle) => {
     body: {
       chatGuid: bundle.inputData.chatGuid,
       message: bundle.inputData.message,
-      method: bundle.inputData.method || "apple-script",
+      method: "private-api",
       subject: bundle.inputData.subject || undefined,
       effectId: bundle.inputData.effectId || undefined,
       tempGuid: randomUUID(),
