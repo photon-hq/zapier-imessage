@@ -13,7 +13,6 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
-    dynamic: "list_chats.id.displayName",
   },
   {
     key: "stickerUrl",

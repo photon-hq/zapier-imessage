@@ -13,7 +13,6 @@ const inputFields = defineInputFields([
     required: true,
     helpText:
       "e.g. iMessage;-;+1234567890 for a DM or iMessage;+;chat123 for a group",
-    dynamic: "list_chats.id.displayName",
   },
   {
     key: "messageGuid",
@@ -28,12 +27,18 @@ const inputFields = defineInputFields([
     type: "string",
     required: true,
     choices: {
-      love: "Love",
-      like: "Like",
-      dislike: "Dislike",
-      laugh: "Laugh",
-      emphasize: "Emphasize",
-      question: "Question",
+      love: "Love ❤️",
+      like: "Like 👍",
+      dislike: "Dislike 👎",
+      laugh: "Laugh 😂",
+      emphasize: "Emphasize ‼️",
+      question: "Question ❓",
+      "-love": "Remove Love",
+      "-like": "Remove Like",
+      "-dislike": "Remove Dislike",
+      "-laugh": "Remove Laugh",
+      "-emphasize": "Remove Emphasize",
+      "-question": "Remove Question",
     },
   },
 ]);
