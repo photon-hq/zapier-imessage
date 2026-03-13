@@ -106,9 +106,9 @@ const authentication: Authentication = {
       label: "Server URL",
       type: "string",
       required: true,
+      default: "https://example.imsgd.photon.codes",
       helpText:
-        "Your Photon iMessage server URL, e.g. `https://abc.example.com` " +
-        "(trailing slashes are handled automatically).",
+        "Your Photon iMessage server URL, e.g. `https://example.imsgd.photon.codes`",
     },
     {
       key: "apiKey",
