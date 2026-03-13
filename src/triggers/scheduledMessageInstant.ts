@@ -1,18 +1,46 @@
-import { defineTrigger } from "zapier-platform-core";
+import {
+  defineTrigger,
+  type WebhookTriggerPerformList,
+} from "zapier-platform-core";
 import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, assertValidSignature } from "./webhookHelpers.js";
+import { normalizeUrl } from "../authentication.js";
 
-const performList = async (_z: ZObject, _bundle: Bundle) => [
-  {
-    id: "sched-sample-msg-1",
-    event: "scheduled-message-sent",
-    guid: "sched-sample-msg-1",
-    text: "Reminder: meeting at 3pm",
-    chatGuid: "iMessage;-;+11234567890",
-    scheduledDate: 1700100000000,
-    error: null,
-  },
-];
+const performList = (async (z: ZObject, bundle: Bundle) => {
+  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  try {
+    const response = await z.request<{
+      data?: Array<{
+        guid?: string;
+        id?: string;
+        text?: string;
+        chatGuid?: string;
+        chats?: string[];
+        scheduledDate?: number;
+        scheduledFor?: number;
+        scheduledAt?: number;
+        status?: string;
+        error?: string | null;
+      }>;
+    }>({
+      url: `${serverUrl}/api/v1/message/schedule`,
+      method: "GET",
+    });
+    const list = response.data?.data ?? (Array.isArray(response.data) ? response.data : []);
+    return list.map((d, i) => ({
+      id: (d.guid ?? d.id ?? `sched-${i}`) as string,
+      event: "scheduled-message-sent",
+      guid: d.guid ?? d.id ?? `sched-${i}`,
+      text: d.text ?? "",
+      chatGuid: d.chatGuid ?? d.chats?.[0],
+      scheduledDate: d.scheduledDate ?? d.scheduledFor ?? d.scheduledAt ?? 0,
+      error: d.error ?? null,
+    }));
+  } catch {
+    // No list endpoint or error; live data comes from webhooks only.
+    return [];
+  }
+}) satisfies WebhookTriggerPerformList;
 
 const SCHEDULED_EVENTS = new Set([
   "scheduled-message-created",
