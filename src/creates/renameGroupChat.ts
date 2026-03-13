@@ -8,10 +8,11 @@ import { requireInboundMessage } from "./inboundCheck.js";
 const inputFields = defineInputFields([
   {
     key: "chatGuid",
-    label: "Chat GUID",
+    label: "Group Chat",
     type: "string",
     required: true,
-    helpText: "The group chat GUID, e.g. iMessage;+;chat123",
+    helpText:
+      "The group chat identifier. Usually mapped from a trigger step.",
   },
   {
     key: "displayName",
