@@ -16,10 +16,10 @@ const inputFields = defineInputFields([
   },
   {
     key: "stickerUrl",
-    label: "Sticker Image",
-    type: "file",
+    label: "Sticker Image URL",
+    type: "string",
     required: true,
-    helpText: "Upload or provide a URL to the sticker image (PNG recommended, transparent background).",
+    helpText: "A public URL to the sticker image (PNG recommended, transparent background). Map from a previous step or paste a link.",
   },
   {
     key: "selectedMessageGuid",

@@ -16,10 +16,10 @@ const inputFields = defineInputFields([
   },
   {
     key: "fileUrl",
-    label: "File",
-    type: "file",
+    label: "File URL",
+    type: "string",
     required: true,
-    helpText: "Upload or provide a URL to the file to send (image, video, PDF, etc.).",
+    helpText: "A public URL to the file to send (image, video, PDF, etc.). Map from a previous step or paste a link.",
   },
   {
     key: "fileName",
