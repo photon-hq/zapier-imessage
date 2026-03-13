@@ -61,6 +61,7 @@ const perform = (async (z, bundle) => {
       name: fileName,
       data: base64,
       isAudioMessage: bundle.inputData.isAudioMessage || false,
+      method: "private-api",
     },
   });
 

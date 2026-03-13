@@ -43,6 +43,7 @@ import votePoll from "./creates/votePoll.js";
 import shareContactCard from "./creates/shareContactCard.js";
 import setChatBackground from "./creates/setChatBackground.js";
 import setGroupIcon from "./creates/setGroupIcon.js";
+import performAction from "./creates/performAction.js";
 
 // Searches
 import findMessages from "./searches/findMessages.js";
@@ -104,6 +105,7 @@ export default defineApp({
   },
 
   creates: {
+    [performAction.key]: performAction,
     [sendMessage.key]: sendMessage,
     [scheduleMessage.key]: scheduleMessage,
     [reactMessage.key]: reactMessage,
