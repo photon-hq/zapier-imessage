@@ -24,9 +24,9 @@ const inputFields = defineInputFields([
   {
     key: "scheduledFor",
     label: "Send At",
-    type: "datetime",
+    type: "string",
     required: true,
-    helpText: "When to send the message. Use a date/time from a previous step or type one (e.g. 2025-01-15 9:00 AM).",
+    helpText: "When to send: a future date/time (e.g. 2025-01-15 9:00 AM) or a number of minutes from now (e.g. 2 or 5).",
   },
   {
     key: "scheduleType",
@@ -48,7 +48,20 @@ const inputFields = defineInputFields([
 
 const perform = (async (z, bundle) => {
   await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
-  const scheduledFor = new Date(bundle.inputData.scheduledFor).getTime();
+  const raw = bundle.inputData.scheduledFor;
+  let scheduledFor: number;
+  const num = typeof raw === "string" ? parseInt(raw.trim(), 10) : Number(raw);
+  if (Number.isInteger(num) && num > 0 && num <= 60 * 24 * 365) {
+    scheduledFor = Date.now() + num * 60 * 1000;
+  } else {
+    scheduledFor = new Date(raw as string | number).getTime();
+  }
+  if (scheduledFor <= Date.now()) {
+    throw new z.errors.Error(
+      "Send At must be in the future. Use a future date/time or a number of minutes from now (e.g. 2 or 5).",
+      "ValidationError",
+    );
+  }
 
   const response = await z.request({
     url: `${bundle.authData.serverUrl}/api/v1/message/schedule`,

@@ -1,6 +1,6 @@
 {
   "name": "zapier-imessage",
-  "version": "3.0.0",
+  "version": "3.0.5",
   "description": "Photon iMessage is a powerful iMessage automation platform that lets you send, receive, and manage iMessages programmatically.",
   "type": "module",
   "main": "dist/index.js",
@@ -15,6 +15,7 @@
     "deploy": "zapier push"
   },
   "dependencies": {
+    "form-data": "^4.0.5",
     "zapier-platform-core": "18.2.3"
   },
   "devDependencies": {

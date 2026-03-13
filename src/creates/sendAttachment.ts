@@ -3,6 +3,8 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
+import { randomUUID } from "node:crypto";
+import FormData from "form-data";
 import { requireInboundMessage } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
@@ -40,33 +42,75 @@ const inputFields = defineInputFields([
 
 const perform = (async (z, bundle) => {
   await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
-  const fileResponse = await z.request({
-    url: bundle.inputData.fileUrl,
-    raw: true,
-  });
-  const buffer = await (fileResponse as unknown as Response).arrayBuffer();
-  const base64 = Buffer.from(buffer).toString("base64");
+  const fileUrl = bundle.inputData.fileUrl as string;
+  let fileResponse: { content?: string; buffer?: () => Promise<Buffer>; status?: number };
+  try {
+    fileResponse = await z.request({
+      url: fileUrl,
+      raw: true,
+      redirect: "follow",
+    }) as unknown as { content?: string; buffer?: () => Promise<Buffer>; status?: number };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new z.errors.Error(
+      `Could not fetch file from URL: ${msg}. Use a direct, publicly accessible link to the file.`,
+      "FetchError",
+    );
+  }
+  let buffer: Buffer;
+  if (typeof fileResponse.buffer === "function") {
+    buffer = await fileResponse.buffer();
+  } else if (fileResponse.content != null) {
+    buffer = Buffer.isBuffer(fileResponse.content)
+      ? fileResponse.content
+      : Buffer.from(fileResponse.content, typeof fileResponse.content === "string" ? "utf8" : undefined);
+  } else {
+    const raw = fileResponse as unknown as { arrayBuffer?: () => Promise<ArrayBuffer> };
+    if (typeof raw.arrayBuffer === "function") {
+      buffer = Buffer.from(await raw.arrayBuffer());
+    } else {
+      throw new z.errors.Error(
+        "Could not read file data from URL. Use a direct link to an image or file (no redirects or HTML pages).",
+        "InvalidAttachment",
+      );
+    }
+  }
+  if (!buffer || buffer.length === 0) {
+    throw new z.errors.Error(
+      "Attachment was empty or could not be downloaded. Use a direct URL to a non-empty file.",
+      "EmptyAttachment",
+    );
+  }
 
   const fileName =
     bundle.inputData.fileName ||
-    bundle.inputData.fileUrl.split("/").pop()?.split("?")[0] ||
+    fileUrl.split("/").pop()?.split("?")[0] ||
     "attachment";
 
+  const form = new FormData();
+  form.append("chatGuid", bundle.inputData.chatGuid as string);
+  form.append("attachment", buffer, { filename: fileName });
+  form.append("name", fileName);
+  form.append("tempGuid", randomUUID());
+  form.append("isAudioMessage", String(bundle.inputData.isAudioMessage === true));
+  if (bundle.inputData.isAudioMessage === true) {
+    form.append("method", "private-api");
+  }
+
   const response = await z.request({
-    url: `${bundle.authData.serverUrl}/api/v1/attachment/upload`,
+    url: `${bundle.authData.serverUrl}/api/v1/message/attachment`,
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: {
-      chatGuid: bundle.inputData.chatGuid,
-      name: fileName,
-      data: base64,
-      isAudioMessage: bundle.inputData.isAudioMessage || false,
-      method: "private-api",
-    },
+    headers: form.getHeaders(),
+    body: form,
   });
 
   const data = response.data as Record<string, unknown>;
-  return { id: data.guid || data.id || `${bundle.inputData.chatGuid}-attachment`, ...data };
+  const out = data?.data ?? data;
+  const result = (typeof out === "object" && out !== null ? out : {}) as Record<string, unknown>;
+  return {
+    id: result.guid ?? result.id ?? `${bundle.inputData.chatGuid}-attachment`,
+    ...result,
+  };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
