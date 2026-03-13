@@ -12,7 +12,6 @@ import newMessageInstant from "./triggers/newMessageInstant.js";
 import messageUpdatedInstant from "./triggers/messageUpdatedInstant.js";
 
 // Creates – core set
-import performAction from "./creates/performAction.js";
 import sendMessage from "./creates/sendMessage.js";
 import scheduleMessage from "./creates/scheduleMessage.js";
 import sendAttachment from "./creates/sendAttachment.js";
@@ -64,7 +63,6 @@ export default defineApp({
   },
 
   creates: {
-    [performAction.key]: performAction,
     [sendMessage.key]: sendMessage,
     [scheduleMessage.key]: scheduleMessage,
     [sendAttachment.key]: sendAttachment,
