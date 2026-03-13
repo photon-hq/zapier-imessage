@@ -10,10 +10,6 @@ import authentication, { addApiKeyToHeader } from "./authentication.js";
 // Webhook (instant) triggers – core set
 import newMessageInstant from "./triggers/newMessageInstant.js";
 import messageUpdatedInstant from "./triggers/messageUpdatedInstant.js";
-import messageSendErrorInstant from "./triggers/messageSendErrorInstant.js";
-import participantAddedInstant from "./triggers/participantAddedInstant.js";
-import participantRemovedInstant from "./triggers/participantRemovedInstant.js";
-import scheduledMessageInstant from "./triggers/scheduledMessageInstant.js";
 
 // Creates – core set
 import performAction from "./creates/performAction.js";
@@ -29,7 +25,6 @@ import reactMessage from "./creates/reactMessage.js";
 import findMessages from "./searches/findMessages.js";
 import getChats from "./searches/getChats.js";
 import getChatParticipants from "./searches/getChatParticipants.js";
-import getContacts from "./searches/getContacts.js";
 
 const handleErrors: AfterResponseMiddleware = (response, z) => {
   if (response.status >= 400) {
@@ -66,10 +61,6 @@ export default defineApp({
   triggers: {
     [newMessageInstant.key]: newMessageInstant,
     [messageUpdatedInstant.key]: messageUpdatedInstant,
-    [messageSendErrorInstant.key]: messageSendErrorInstant,
-    [participantAddedInstant.key]: participantAddedInstant,
-    [participantRemovedInstant.key]: participantRemovedInstant,
-    [scheduledMessageInstant.key]: scheduledMessageInstant,
   },
 
   creates: {
@@ -87,6 +78,5 @@ export default defineApp({
     [findMessages.key]: findMessages,
     [getChats.key]: getChats,
     [getChatParticipants.key]: getChatParticipants,
-    [getContacts.key]: getContacts,
   },
 });
