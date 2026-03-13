@@ -18,19 +18,22 @@ const inputFields = defineInputFields([
     label: "Search Text",
     type: "string",
     required: true,
+    helpText: "Find messages containing this text.",
   },
   {
     key: "chatGuid",
-    label: "Chat (optional)",
+    label: "Limit to Chat",
     type: "string",
     required: false,
+    helpText: "Only search within a specific conversation. Leave blank to search all chats.",
   },
   {
     key: "limit",
     label: "Max Results",
     type: "integer",
     required: false,
-    default: "5",
+    default: "10",
+    helpText: "How many messages to return (default 10).",
   },
 ]);
 
@@ -42,7 +45,7 @@ const perform = (async (z, bundle) => {
         args: { text: `%${bundle.inputData.query}%` },
       },
     ],
-    limit: bundle.inputData.limit || 5,
+    limit: bundle.inputData.limit || 10,
     sort: "DESC",
   };
 
@@ -92,11 +95,11 @@ export default defineSearch({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "GUID" },
+      { key: "guid", label: "Message ID" },
       { key: "text", label: "Text" },
       { key: "sender", label: "Sender" },
-      { key: "chatGuid", label: "Chat GUID" },
-      { key: "dateCreated", label: "Date Created", type: "integer" },
+      { key: "chatGuid", label: "Chat" },
+      { key: "dateCreated", label: "Date", type: "integer" },
     ],
   },
 });

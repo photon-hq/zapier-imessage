@@ -4,16 +4,7 @@ import {
   type SearchPerform,
 } from "zapier-platform-core";
 
-const inputFields = defineInputFields([
-  {
-    key: "placeholder",
-    label: "Fetch Server Info",
-    type: "string",
-    required: false,
-    default: "yes",
-    helpText: "No input needed — this fetches your server's current status.",
-  },
-]);
+const inputFields = defineInputFields([]);
 
 const perform = (async (z, bundle) => {
   const response = await z.request<Record<string, unknown>>({

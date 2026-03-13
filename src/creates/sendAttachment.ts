@@ -16,25 +16,25 @@ const inputFields = defineInputFields([
   },
   {
     key: "fileUrl",
-    label: "File URL",
-    type: "string",
+    label: "File",
+    type: "file",
     required: true,
-    helpText: "A publicly accessible URL to the file to send.",
+    helpText: "Upload or provide a URL to the file to send (image, video, PDF, etc.).",
   },
   {
     key: "fileName",
-    label: "File Name",
+    label: "Custom File Name",
     type: "string",
     required: false,
-    helpText: "Custom file name (e.g. photo.jpg). Inferred from URL if omitted.",
+    helpText: "Override the file name (e.g. photo.jpg). Auto-detected if left blank.",
   },
   {
     key: "isAudioMessage",
-    label: "Send as Audio Message",
+    label: "Send as Voice Message",
     type: "boolean",
     required: false,
     default: "false",
-    helpText: "If true, sends as a voice message (file must be .m4a or .caf).",
+    helpText: "Send as a playable voice message instead of a file. The file must be .caf or .m4a audio.",
   },
 ]);
 

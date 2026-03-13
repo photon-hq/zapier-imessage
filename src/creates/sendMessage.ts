@@ -26,6 +26,7 @@ const inputFields = defineInputFields([
     label: "Subject",
     type: "string",
     required: false,
+    helpText: "Optional subject line (shows as bold header above the message).",
   },
   {
     key: "effectId",
@@ -34,7 +35,6 @@ const inputFields = defineInputFields([
     required: false,
     helpText: "Optional bubble or screen effect to apply to the message.",
     choices: {
-      "": "None",
       "com.apple.messages.effect.CKConfettiEffect": "Confetti",
       "com.apple.messages.effect.CKFireworksEffect": "Fireworks",
       "com.apple.messages.effect.CKBalloonEffect": "Balloons",

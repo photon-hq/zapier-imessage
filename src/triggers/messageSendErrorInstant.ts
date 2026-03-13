@@ -48,10 +48,10 @@ export default defineTrigger({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "GUID" },
+      { key: "guid", label: "Message ID" },
       { key: "text", label: "Text" },
       { key: "error", label: "Error Message" },
-      { key: "chatGuid", label: "Chat GUID" },
+      { key: "chatGuid", label: "Chat" },
     ],
   },
 });

@@ -79,10 +79,10 @@ export default defineTrigger({
     outputFields: [
       { key: "id", label: "ID" },
       { key: "event", label: "Event Type" },
-      { key: "guid", label: "GUID" },
+      { key: "guid", label: "Message ID" },
       { key: "text", label: "Text" },
-      { key: "chatGuid", label: "Chat GUID" },
-      { key: "scheduledDate", label: "Scheduled Date", type: "integer" },
+      { key: "chatGuid", label: "Chat" },
+      { key: "scheduledDate", label: "Send At", type: "integer" },
       { key: "error", label: "Error" },
     ],
   },

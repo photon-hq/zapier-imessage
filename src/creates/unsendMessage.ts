@@ -7,18 +7,18 @@ import {
 const inputFields = defineInputFields([
   {
     key: "messageGuid",
-    label: "Message GUID",
+    label: "Message",
     type: "string",
     required: true,
-    helpText: "The GUID of the message to unsend.",
+    helpText: "The message ID to unsend. Map this from a trigger or previous step.",
   },
   {
     key: "partIndex",
-    label: "Part Index",
+    label: "Message Part",
     type: "integer",
     required: false,
     default: "0",
-    helpText: "The part index of the message (default 0).",
+    helpText: "Which part of the message to unsend (0 for the main text). Usually leave at 0.",
   },
 ]);
 
