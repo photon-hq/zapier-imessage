@@ -21,7 +21,7 @@ const inputFields = defineInputFields([
   },
   {
     key: "chatGuid",
-    label: "Chat GUID (optional)",
+    label: "Chat (optional)",
     type: "string",
     required: false,
   },
