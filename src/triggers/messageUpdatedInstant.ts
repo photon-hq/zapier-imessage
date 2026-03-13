@@ -1,23 +1,51 @@
-import { defineTrigger } from "zapier-platform-core";
+import {
+  defineTrigger,
+  type WebhookTriggerPerformList,
+} from "zapier-platform-core";
 import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
+import { normalizeUrl } from "../authentication.js";
 
-const performList = async (_z: ZObject, _bundle: Bundle) => [
-  {
-    id: "p:0/fake-guid-1234",
-    guid: "p:0/fake-guid-1234",
-    text: "Edited message text",
-    sender: "+11234567890",
-    chatGuid: "iMessage;-;+11234567890",
-    dateCreated: 1700000000000,
-    isFromMe: false,
-  },
-];
+const performList = (async (z: ZObject, bundle: Bundle) => {
+  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  const response = await z.request<{
+    data?: Array<{
+      guid: string;
+      text: string;
+      handle?: { address: string };
+      chats?: string[];
+      dateCreated: number;
+      isFromMe: boolean;
+      dateModified?: number;
+      previousText?: string;
+    }>;
+  }>({
+    url: `${serverUrl}/api/v1/message/query`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: { sort: "DESC", limit: 10 },
+  });
+
+  const messages = response.data?.data ?? [];
+  return messages.map((msg) => ({
+    id: msg.guid,
+    guid: msg.guid,
+    text: msg.text,
+    previousText: msg.previousText,
+    editedAt: msg.dateModified,
+    sender: msg.handle?.address,
+    chatGuid: msg.chats?.[0],
+    dateCreated: msg.dateCreated,
+    isFromMe: msg.isFromMe ?? false,
+  }));
+}) satisfies WebhookTriggerPerformList;
 
 const perform = makePerform("updated-message", (msg) => ({
   id: (msg.guid as string) || `hook-${Date.now()}`,
   guid: msg.guid,
   text: msg.text,
+  previousText: msg.previousText ?? msg.originalText ?? undefined,
+  editedAt: msg.editedAt ?? msg.dateModified ?? undefined,
   sender:
     (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
   chatGuid:
@@ -46,9 +74,11 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "p:0/fake-guid-1234",
-      guid: "p:0/fake-guid-1234",
+      id: "p:0/sample-updated-msg-1",
+      guid: "p:0/sample-updated-msg-1",
       text: "Edited message text",
+      previousText: "Original message before edit",
+      editedAt: 1710000000000,
       sender: "+11234567890",
       chatGuid: "iMessage;-;+11234567890",
       dateCreated: 1700000000000,
@@ -57,7 +87,9 @@ export default defineTrigger({
     outputFields: [
       { key: "id", label: "ID" },
       { key: "guid", label: "Message ID" },
-      { key: "text", label: "Text" },
+      { key: "text", label: "Text (current after edit)" },
+      { key: "previousText", label: "Previous Text (before edit)" },
+      { key: "editedAt", label: "Edited At", type: "integer" },
       { key: "sender", label: "Sender" },
       { key: "chatGuid", label: "Chat" },
       { key: "dateCreated", label: "Date", type: "integer" },

@@ -93,42 +93,34 @@ async function chatExistsOnServer(
 }
 
 /**
- * Allows the action if the chat has any messages OR exists on the server.
- * Only blocks truly unknown/non-existent conversations.
+ * Inbound-first policy disabled: allow all sends. Re-enable by uncommenting
+ * the checks below and removing the immediate return.
  */
 export async function requireInboundMessage(
-  z: ZObject,
-  bundle: Bundle,
-  chatGuid: string,
+  _z: ZObject,
+  _bundle: Bundle,
+  _chatGuid: string,
 ): Promise<void> {
-  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
-
-  if (await hasAnyMessages(z, serverUrl, chatGuid)) return;
-  if (await chatExistsOnServer(z, serverUrl, chatGuid)) return;
-
-  throw new z.errors.Error(POLICY_ERROR, "InboundFirstPolicy");
+  return;
+  // const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  // if (await hasAnyMessages(z, serverUrl, chatGuid)) return;
+  // if (await chatExistsOnServer(z, serverUrl, chatGuid)) return;
+  // throw new z.errors.Error(POLICY_ERROR, "InboundFirstPolicy");
 }
 
 /**
- * For createGroupChat: checks that at least one of the provided addresses
- * has an existing conversation on the server.
+ * Inbound-first policy disabled for createGroupChat: allow all addresses.
  */
 export async function requireInboundForAddresses(
-  z: ZObject,
-  bundle: Bundle,
-  addresses: string[],
+  _z: ZObject,
+  _bundle: Bundle,
+  _addresses: string[],
 ): Promise<void> {
-  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
-
-  for (const address of addresses) {
-    if (await hasAnyMessages(z, serverUrl, address)) return;
-    if (await chatExistsOnServer(z, serverUrl, address)) return;
-  }
-
-  throw new z.errors.Error(
-    "Photon Inbound-First Policy: None of the provided addresses have prior " +
-      "conversation history. You can only create group chats with contacts you've " +
-      "messaged before. Contact the Photon team for special access.",
-    "InboundFirstPolicy",
-  );
+  return;
+  // const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  // for (const address of addresses) {
+  //   if (await hasAnyMessages(z, serverUrl, address)) return;
+  //   if (await chatExistsOnServer(z, serverUrl, address)) return;
+  // }
+  // throw new z.errors.Error("...", "InboundFirstPolicy");
 }

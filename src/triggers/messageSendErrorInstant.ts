@@ -2,15 +2,8 @@ import { defineTrigger } from "zapier-platform-core";
 import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
 
-const performList = async (_z: ZObject, _bundle: Bundle) => [
-  {
-    id: "p:0/error-guid-1234",
-    guid: "p:0/error-guid-1234",
-    text: "Failed message",
-    error: "Network timeout",
-    chatGuid: "iMessage;-;+11234567890",
-  },
-];
+// No API to list send errors; live data comes only from webhooks. Return empty so test step shows no fake records.
+const performList = async (_z: ZObject, _bundle: Bundle) => [];
 
 const perform = makePerform("message-send-error", (data) => ({
   id: (data.guid as string) || (data.tempGuid as string) || `err-${Date.now()}`,
@@ -40,8 +33,8 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "p:0/error-guid-1234",
-      guid: "p:0/error-guid-1234",
+      id: "p:0/sample-send-error-1",
+      guid: "p:0/sample-send-error-1",
       text: "Failed message",
       error: "Network timeout",
       chatGuid: "iMessage;-;+11234567890",

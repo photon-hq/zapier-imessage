@@ -19,7 +19,7 @@ const inputFields = defineInputFields([
     label: "Message",
     type: "string",
     required: true,
-    helpText: "The message to react to. Map this from a trigger or search step.",
+    helpText: "The message GUID to react to. Map from a New Message trigger (Message ID / guid) or from Find Messages search (guid).",
   },
   {
     key: "reaction",
