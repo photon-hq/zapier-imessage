@@ -35,14 +35,14 @@ const inputFields = defineInputFields([
     required: false,
     default: "once",
     helpText: "Send the message once or on a recurring schedule.",
-    choices: {
-      once: "Send Once",
-      hourly: "Every Hour",
-      daily: "Every Day",
-      weekly: "Every Week",
-      monthly: "Every Month",
-      yearly: "Every Year",
-    },
+    choices: [
+      { value: "once", label: "Send Once", sample: "once" },
+      { value: "hourly", label: "Every Hour", sample: "hourly" },
+      { value: "daily", label: "Every Day", sample: "daily" },
+      { value: "weekly", label: "Every Week", sample: "weekly" },
+      { value: "monthly", label: "Every Month", sample: "monthly" },
+      { value: "yearly", label: "Every Year", sample: "yearly" },
+    ],
   },
 ]);
 
