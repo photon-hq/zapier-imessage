@@ -16,34 +16,34 @@ const inputFields = defineInputFields([
   },
   {
     key: "stickerUrl",
-    label: "Sticker Image URL",
-    type: "string",
+    label: "Sticker Image",
+    type: "file",
     required: true,
-    helpText: "A publicly accessible URL to the sticker image (PNG recommended).",
+    helpText: "Upload or provide a URL to the sticker image (PNG recommended, transparent background).",
   },
   {
     key: "selectedMessageGuid",
-    label: "Reply to Message GUID",
+    label: "Attach to Message",
     type: "string",
     required: false,
     helpText:
-      "If provided, the sticker is attached to this message bubble (reply sticker). Otherwise sent standalone.",
+      "Place the sticker on top of a specific message. Map the message ID from a trigger. Leave blank to send standalone.",
   },
   {
     key: "stickerX",
-    label: "Sticker X Position",
+    label: "Horizontal Position",
     type: "number",
     required: false,
     default: "0.5",
-    helpText: "Horizontal position on the message bubble (0-1). Only for reply stickers.",
+    helpText: "Where on the message bubble to place the sticker horizontally (0 = left, 1 = right). Only used when attaching to a message.",
   },
   {
     key: "stickerY",
-    label: "Sticker Y Position",
+    label: "Vertical Position",
     type: "number",
     required: false,
     default: "0.5",
-    helpText: "Vertical position on the message bubble (0-1). Only for reply stickers.",
+    helpText: "Where on the message bubble to place the sticker vertically (0 = top, 1 = bottom). Only used when attaching to a message.",
   },
 ]);
 

@@ -4,16 +4,7 @@ import {
   type SearchPerform,
 } from "zapier-platform-core";
 
-const inputFields = defineInputFields([
-  {
-    key: "placeholder",
-    label: "Fetch Friend Locations",
-    type: "string",
-    required: false,
-    default: "yes",
-    helpText: "No input needed — this refreshes and returns all friends' locations.",
-  },
-]);
+const inputFields = defineInputFields([]);
 
 interface FriendLocation {
   handle: string;
@@ -64,11 +55,11 @@ export default defineSearch({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "handle", label: "Handle" },
+      { key: "handle", label: "Person" },
       { key: "latitude", label: "Latitude", type: "number" },
       { key: "longitude", label: "Longitude", type: "number" },
       { key: "address", label: "Address" },
-      { key: "mapsUrl", label: "Google Maps URL" },
+      { key: "mapsUrl", label: "Google Maps Link" },
     ],
   },
 });

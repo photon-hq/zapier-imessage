@@ -41,7 +41,7 @@ export default defineTrigger({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "chatGuid", label: "Chat GUID" },
+      { key: "chatGuid", label: "Group Chat" },
       { key: "participant", label: "Participant" },
     ],
   },

@@ -7,10 +7,10 @@ import {
 const inputFields = defineInputFields([
   {
     key: "query",
-    label: "Search Name",
+    label: "Name",
     type: "string",
     required: false,
-    helpText: "Optional name to filter contacts by. Leave empty for all.",
+    helpText: "Filter contacts by name. Leave blank to return all contacts.",
   },
 ]);
 

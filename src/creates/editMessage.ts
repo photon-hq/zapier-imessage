@@ -7,32 +7,33 @@ import {
 const inputFields = defineInputFields([
   {
     key: "messageGuid",
-    label: "Message GUID",
+    label: "Message",
     type: "string",
     required: true,
-    helpText: "The GUID of the message to edit.",
+    helpText: "The message ID to edit. Map this from a trigger or previous step.",
   },
   {
     key: "editedMessage",
-    label: "New Message Text",
+    label: "New Text",
     type: "text",
     required: true,
-    helpText: "The new text content for the message.",
+    helpText: "The replacement text for this message.",
   },
   {
     key: "backwardsCompatibilityMessage",
-    label: "Backwards Compatibility Text",
+    label: "Fallback Text",
     type: "text",
     required: false,
     helpText:
-      "Text shown to recipients on older devices. Defaults to the new message text.",
+      "Text shown to recipients on older Apple devices that don't support edits. Defaults to the new text.",
   },
   {
     key: "partIndex",
-    label: "Part Index",
+    label: "Message Part",
     type: "integer",
     required: false,
     default: "0",
+    helpText: "Which part of the message to edit (0 for the main text). Usually leave at 0.",
   },
 ]);
 
@@ -75,9 +76,9 @@ export default defineCreate({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "GUID" },
-      { key: "text", label: "Text" },
-      { key: "dateEdited", label: "Date Edited", type: "integer" },
+      { key: "guid", label: "Message ID" },
+      { key: "text", label: "Updated Text" },
+      { key: "dateEdited", label: "Edited At", type: "integer" },
     ],
   },
 });

@@ -11,13 +11,15 @@ const inputFields = defineInputFields([
     type: "integer",
     required: false,
     default: "25",
+    helpText: "How many conversations to return (default 25).",
   },
   {
     key: "withLastMessage",
-    label: "Include Last Message",
+    label: "Include Last Message Preview",
     type: "boolean",
     required: false,
     default: "true",
+    helpText: "Include the most recent message text and date for each conversation.",
   },
 ]);
 
@@ -82,11 +84,11 @@ export default defineSearch({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "Chat GUID" },
-      { key: "chatIdentifier", label: "Chat Identifier" },
-      { key: "displayName", label: "Display Name" },
-      { key: "isGroup", label: "Is Group Chat", type: "boolean" },
-      { key: "lastMessageText", label: "Last Message Text" },
+      { key: "guid", label: "Chat" },
+      { key: "chatIdentifier", label: "Phone / Email" },
+      { key: "displayName", label: "Name" },
+      { key: "isGroup", label: "Group Chat", type: "boolean" },
+      { key: "lastMessageText", label: "Last Message" },
       { key: "lastMessageDate", label: "Last Message Date", type: "integer" },
     ],
   },

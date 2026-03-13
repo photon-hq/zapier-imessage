@@ -8,18 +8,18 @@ import { requireInboundForAddresses } from "./inboundCheck.js";
 const inputFields = defineInputFields([
   {
     key: "addresses",
-    label: "Participant Addresses",
+    label: "Participants",
     type: "string",
     required: true,
     helpText:
-      "Comma-separated phone numbers or emails, e.g. +1234567890,+0987654321",
+      "Phone numbers or emails of people to add, separated by commas. E.g. +1234567890, +0987654321, john@icloud.com",
   },
   {
     key: "message",
-    label: "Initial Message",
+    label: "First Message",
     type: "text",
     required: false,
-    helpText: "Optional message to send when creating the chat.",
+    helpText: "Send a message when creating the group. Leave blank to create it empty.",
   },
 ]);
 
@@ -67,8 +67,8 @@ export default defineCreate({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "Chat GUID" },
-      { key: "displayName", label: "Display Name" },
+      { key: "guid", label: "Group Chat ID" },
+      { key: "displayName", label: "Group Name" },
     ],
   },
 });

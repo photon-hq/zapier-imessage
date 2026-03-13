@@ -40,8 +40,8 @@ export default defineTrigger({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "chatGuid", label: "Chat GUID" },
-      { key: "isRead", label: "Is Read", type: "boolean" },
+      { key: "chatGuid", label: "Chat" },
+      { key: "isRead", label: "Read", type: "boolean" },
     ],
   },
 });

@@ -16,17 +16,17 @@ const inputFields = defineInputFields([
   },
   {
     key: "pollMessageGuid",
-    label: "Poll Message GUID",
+    label: "Poll Message",
     type: "string",
     required: true,
-    helpText: "The GUID of the poll message to vote on.",
+    helpText: "The poll message to vote on. Map this from a trigger or search step.",
   },
   {
     key: "optionIdentifier",
-    label: "Option Identifier",
+    label: "Poll Option",
     type: "string",
     required: true,
-    helpText: "The UUID of the poll option to vote for.",
+    helpText: "The identifier of the option to vote for. Map this from the poll data in a previous step.",
   },
 ]);
 

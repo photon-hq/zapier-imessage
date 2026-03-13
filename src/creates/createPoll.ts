@@ -16,18 +16,18 @@ const inputFields = defineInputFields([
   },
   {
     key: "title",
-    label: "Poll Question",
+    label: "Question",
     type: "string",
     required: false,
-    helpText: "The poll title/question (optional).",
+    helpText: "The poll question, e.g. \"Where should we eat?\" Leave blank for an untitled poll.",
   },
   {
     key: "options",
-    label: "Poll Options",
+    label: "Choices",
     type: "string",
     required: true,
     helpText:
-      "Comma-separated list of at least 2 options (each at least 2 characters), e.g. Option A, Option B, Option C",
+      "The answer choices, separated by commas. At least 2 required. E.g. Pizza, Sushi, Tacos",
   },
 ]);
 
@@ -90,8 +90,8 @@ export default defineCreate({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "guid", label: "GUID" },
-      { key: "text", label: "Poll Question" },
+      { key: "guid", label: "Poll ID" },
+      { key: "text", label: "Question" },
     ],
   },
 });

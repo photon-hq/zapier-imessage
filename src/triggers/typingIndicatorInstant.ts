@@ -43,8 +43,8 @@ export default defineTrigger({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "chatGuid", label: "Chat GUID" },
-      { key: "display", label: "Is Typing", type: "boolean" },
+      { key: "chatGuid", label: "Chat" },
+      { key: "display", label: "Currently Typing", type: "boolean" },
       { key: "sender", label: "Sender" },
     ],
   },

@@ -10,7 +10,7 @@ const inputFields = defineInputFields([
     label: "Phone Number or Email",
     type: "string",
     required: true,
-    helpText: "The phone number or email to check, e.g. +1234567890",
+    helpText: "Check if this person has iMessage, e.g. +1234567890 or john@icloud.com",
   },
 ]);
 
@@ -56,9 +56,9 @@ export default defineSearch({
     },
     outputFields: [
       { key: "id", label: "ID" },
-      { key: "address", label: "Address" },
-      { key: "iMessageAvailable", label: "iMessage Available", type: "boolean" },
-      { key: "suggestedChatGuid", label: "Suggested Chat GUID" },
+      { key: "address", label: "Phone / Email" },
+      { key: "iMessageAvailable", label: "Has iMessage", type: "boolean" },
+      { key: "suggestedChatGuid", label: "Chat ID to Use" },
     ],
   },
 });

@@ -59,7 +59,7 @@ export default defineTrigger({
     outputFields: [
       { key: "id", label: "ID" },
       { key: "event", label: "Event Type" },
-      { key: "chatGuid", label: "Chat GUID" },
+      { key: "chatGuid", label: "Group Chat" },
     ],
   },
 });
