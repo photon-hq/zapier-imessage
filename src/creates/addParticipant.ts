@@ -33,7 +33,10 @@ const perform = (async (z, bundle) => {
   });
 
   const data = response.data as Record<string, unknown>;
-  return { id: data.id || `${bundle.inputData.chatGuid}-${bundle.inputData.address}`, ...data };
+  const id = (data.id ?? data.ID ?? `${bundle.inputData.chatGuid}-${bundle.inputData.address}`) as string;
+  const status = (data.status ?? data.Status ?? 200) as number;
+  const message = (data.message ?? data.Message ?? "Success") as string;
+  return { id, status, message, chatGuid: bundle.inputData.chatGuid, address: bundle.inputData.address, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
@@ -49,14 +52,24 @@ export default defineCreate({
     inputFields,
     perform,
     sample: {
-      id: "participant-add-1234",
+      id: "618498117be84f15b83d6ad1ea918865-+918527438574",
       status: 200,
-      message: "Participant added successfully",
+      message: "Success",
+      chatGuid: "any;+;618498117be84f15b83d6ad1ea918865",
+      address: "+918527438574",
+      data: {
+        displayName: "Photon MCP Test GC",
+        guid: "618498117be84f15b83d6ad1ea918865",
+        chatIdentifier: "618498117be84f15b83d6ad1ea918865",
+      },
     },
     outputFields: [
       { key: "id", label: "ID" },
       { key: "status", label: "Status", type: "integer" },
       { key: "message", label: "Message" },
+      { key: "chatGuid", label: "Chat GUID" },
+      { key: "address", label: "Address" },
+      { key: "data", label: "Chat Data", dict: true },
     ],
   },
 });

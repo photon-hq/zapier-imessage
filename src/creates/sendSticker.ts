@@ -64,6 +64,7 @@ const perform = (async (z, bundle) => {
     name: fileName,
     data: base64,
     isSticker: true,
+    method: "private-api",
   };
 
   if (bundle.inputData.selectedMessageGuid) {
