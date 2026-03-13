@@ -61,9 +61,9 @@ export default defineTrigger({
   noun: "Message",
 
   display: {
-    label: "New Message Received (Instant)",
+    label: "New Message Received",
     description:
-      "Triggers when a new iMessage is received instantly via the Photon Webhook Bridge.",
+      "Triggers when a new iMessage is received on your Photon server via the Webhook Bridge.",
   },
 
   operation: {

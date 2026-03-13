@@ -1,5 +1,5 @@
 import { defineTrigger } from "zapier-platform-core";
-import { subscribe, unsubscribe } from "./webhookHelpers.js";
+import { subscribe, unsubscribe, assertValidSignature } from "./webhookHelpers.js";
 import type { ZObject, Bundle } from "zapier-platform-core";
 
 const SERVER_EVENTS = new Set([
@@ -9,7 +9,9 @@ const SERVER_EVENTS = new Set([
   "server-update-installing",
 ]);
 
-const perform = async (_z: ZObject, bundle: Bundle) => {
+const perform = async (z: ZObject, bundle: Bundle) => {
+  assertValidSignature(z, bundle);
+
   const payload = bundle.cleanedRequest as {
     event?: string;
     data?: Record<string, unknown>;
@@ -46,7 +48,7 @@ export default defineTrigger({
   noun: "Server Update",
 
   display: {
-    label: "Server Update (Instant)",
+    label: "Server Update",
     description:
       "Triggers when your Photon server has an update, is downloading, or installing.",
   },

@@ -33,7 +33,7 @@ export default defineTrigger({
   noun: "Message",
 
   display: {
-    label: "Message Updated (Instant)",
+    label: "Message Updated",
     description:
       "Triggers when an iMessage is edited or updated on your Photon server.",
   },

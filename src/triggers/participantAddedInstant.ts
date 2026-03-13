@@ -22,7 +22,7 @@ export default defineTrigger({
   noun: "Participant",
 
   display: {
-    label: "Participant Added (Instant)",
+    label: "Participant Added",
     description:
       "Triggers when a participant is added to a group chat on your Photon server.",
   },

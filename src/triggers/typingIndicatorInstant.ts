@@ -23,7 +23,7 @@ export default defineTrigger({
   noun: "Typing Indicator",
 
   display: {
-    label: "Typing Indicator (Instant)",
+    label: "Typing Indicator",
     description:
       "Triggers when someone starts or stops typing in an iMessage conversation.",
   },

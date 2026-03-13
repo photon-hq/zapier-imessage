@@ -23,7 +23,7 @@ export default defineTrigger({
   noun: "FaceTime Call",
 
   display: {
-    label: "FaceTime Call Status Changed (Instant)",
+    label: "FaceTime Call Status Changed",
     description:
       "Triggers when a FaceTime call status changes on your Photon server.",
   },

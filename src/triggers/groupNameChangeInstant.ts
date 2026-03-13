@@ -23,7 +23,7 @@ export default defineTrigger({
   noun: "Group Name",
 
   display: {
-    label: "Group Name Changed (Instant)",
+    label: "Group Name Changed",
     description:
       "Triggers when a group chat is renamed on your Photon server.",
   },

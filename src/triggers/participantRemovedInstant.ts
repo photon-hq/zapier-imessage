@@ -22,7 +22,7 @@ export default defineTrigger({
   noun: "Participant",
 
   display: {
-    label: "Participant Removed (Instant)",
+    label: "Participant Removed",
     description:
       "Triggers when a participant is removed from a group chat on your Photon server.",
   },
