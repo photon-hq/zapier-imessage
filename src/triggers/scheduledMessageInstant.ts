@@ -4,9 +4,9 @@ import { subscribe, unsubscribe, assertValidSignature } from "./webhookHelpers.j
 
 const performList = async (_z: ZObject, _bundle: Bundle) => [
   {
-    id: "sched-guid-1234",
-    event: "scheduled-message-created",
-    guid: "sched-guid-1234",
+    id: "sched-sample-msg-1",
+    event: "scheduled-message-sent",
+    guid: "sched-sample-msg-1",
     text: "Reminder: meeting at 3pm",
     chatGuid: "iMessage;-;+11234567890",
     scheduledDate: 1700100000000,
@@ -68,9 +68,9 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "sched-guid-1234",
-      event: "scheduled-message-created",
-      guid: "sched-guid-1234",
+      id: "sched-sample-msg-1",
+      event: "scheduled-message-sent",
+      guid: "sched-sample-msg-1",
       text: "Reminder: meeting at 3pm",
       chatGuid: "iMessage;-;+11234567890",
       scheduledDate: 1700100000000,

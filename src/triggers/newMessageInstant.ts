@@ -74,8 +74,8 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "p:0/fake-guid-1234",
-      guid: "p:0/fake-guid-1234",
+      id: "p:0/sample-new-msg-1",
+      guid: "p:0/sample-new-msg-1",
       text: "Hello from iMessage!",
       sender: "+11234567890",
       chatGuid: "iMessage;-;+11234567890",

@@ -4,8 +4,8 @@ import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
 
 const performList = async (_z: ZObject, _bundle: Bundle) => [
   {
-    id: "p:0/error-guid-1234",
-    guid: "p:0/error-guid-1234",
+    id: "p:0/sample-send-error-1",
+    guid: "p:0/sample-send-error-1",
     text: "Failed message",
     error: "Network timeout",
     chatGuid: "iMessage;-;+11234567890",
@@ -40,8 +40,8 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "p:0/error-guid-1234",
-      guid: "p:0/error-guid-1234",
+      id: "p:0/sample-send-error-1",
+      guid: "p:0/sample-send-error-1",
       text: "Failed message",
       error: "Network timeout",
       chatGuid: "iMessage;-;+11234567890",

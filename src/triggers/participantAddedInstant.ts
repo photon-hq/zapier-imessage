@@ -4,8 +4,8 @@ import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
 
 const performList = async (_z: ZObject, _bundle: Bundle) => [
   {
-    id: "padd-iMessage;+;chat123-1700000000000",
-    chatGuid: "iMessage;+;chat123",
+    id: "padd-iMessage;+;sample-chat-1700000000000",
+    chatGuid: "iMessage;+;sample-chat",
     participant: "+11234567890",
   },
 ];
@@ -35,8 +35,8 @@ export default defineTrigger({
     performUnsubscribe: unsubscribe,
 
     sample: {
-      id: "padd-iMessage;+;chat123-1700000000000",
-      chatGuid: "iMessage;+;chat123",
+      id: "padd-iMessage;+;sample-chat-1700000000000",
+      chatGuid: "iMessage;+;sample-chat",
       participant: "+11234567890",
     },
     outputFields: [
