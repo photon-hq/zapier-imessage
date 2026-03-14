@@ -63,7 +63,7 @@ export default defineTrigger({
   display: {
     label: "New Message Received",
     description:
-      "Triggers when a new iMessage is received. Webhook configuration and signing are handled automatically via https://webhook.photon.codes when the Zap turns on.",
+      "Triggers when a new iMessage is received. Setup: add this trigger, copy the Webhook URL Zapier shows, then at https://webhook.photon.codes enter your Server URL, API Key, and that Webhook URL. Paste the Signing Secret from the bridge into your connection.",
   },
 
   operation: {
