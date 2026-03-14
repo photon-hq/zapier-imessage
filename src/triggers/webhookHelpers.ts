@@ -1,17 +1,15 @@
 /**
- * Webhook trigger lifecycle (automatic when Zap is ON). Bridge: github.com/photon-hq/webhook.
+ * Webhook trigger lifecycle for https://webhook.photon.codes
  *
- * 1) Subscribe (Zap ON): We POST to bridge with { serverUrl, apiKey, webhookUrl }.
- *    Bridge must return { id, signingSecret }. Bridge generates the signing secret;
- *    we store it and use it only to verify incoming requests. If the bridge only
- *    has a web form today, it needs POST /api/webhooks (and DELETE /api/webhooks/:id)
- *    so Zapier can subscribe without manual steps.
+ * 1) Subscribe (Zap ON): POST to bridge /api/webhooks with
+ *    { serverUrl, apiKey, webhookUrl }. Bridge returns { id, signingSecret }.
+ *    Both are stored in subscribeData automatically by Zapier.
  *
- * 2) Bridge forwards: POST to webhookUrl with body { event, data }, headers
- *    X-Photon-Signature (v0=<hmac-hex>), X-Photon-Timestamp (unix sec).
- *    HMAC = HMAC-SHA256(signingSecret, "v0:" + timestamp + ":" + rawBody). We verify.
+ * 2) Incoming webhooks: Bridge POSTs to Zapier with body { event, data },
+ *    headers X-Photon-Signature (v0=<hmac-hex>), X-Photon-Timestamp (unix sec).
+ *    We verify with verifySignature() using subscribeData.signingSecret.
  *
- * 3) Unsubscribe (Zap OFF): We DELETE bridge /api/webhooks/:id.
+ * 3) Unsubscribe (Zap OFF): DELETE bridge /api/webhooks/:id.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type {
@@ -25,9 +23,9 @@ import { normalizeUrl, WEBHOOK_BRIDGE_URL } from "../authentication.js";
 const MAX_TIMESTAMP_DRIFT_SECONDS = 300;
 
 /**
- * Verifies the HMAC-SHA256 signature on an incoming webhook payload from the
- * Photon Webhook Bridge.  Returns true when the signature is valid or when
- * no signing secret is available (graceful degradation for older subscriptions).
+ * Verifies the HMAC-SHA256 signature on an incoming webhook payload.
+ * Signature format: v0=<hex>
+ * Signed base string: v0:<timestamp>:<rawBody>
  */
 export function verifySignature(
   rawBody: string,
@@ -35,7 +33,8 @@ export function verifySignature(
   signature: string | undefined,
   timestamp: string | undefined,
 ): boolean {
-  if (!signingSecret || !signature || !timestamp) return true;
+  if (!signingSecret) return false;
+  if (!signature || !timestamp) return false;
 
   const ts = Number(timestamp);
   if (Number.isNaN(ts)) return false;
@@ -54,10 +53,9 @@ export function verifySignature(
 }
 
 export const subscribe = (async (z: ZObject, bundle: Bundle) => {
-  const bridgeUrl = normalizeUrl(
-    (bundle.authData.webhookBridgeUrl as string) || WEBHOOK_BRIDGE_URL,
-  );
+  const bridgeUrl = normalizeUrl(WEBHOOK_BRIDGE_URL);
   const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+
   const response = await z.request({
     url: `${bridgeUrl}/api/webhooks`,
     method: "POST",
@@ -73,13 +71,11 @@ export const subscribe = (async (z: ZObject, bundle: Bundle) => {
 }) satisfies WebhookTriggerPerformSubscribe;
 
 export const unsubscribe = (async (z: ZObject, bundle: Bundle) => {
-  const bridgeUrl = normalizeUrl(
-    (bundle.authData.webhookBridgeUrl as string) || WEBHOOK_BRIDGE_URL,
-  );
   if (!bundle.subscribeData?.id) {
     return {};
   }
 
+  const bridgeUrl = normalizeUrl(WEBHOOK_BRIDGE_URL);
   await z.request({
     url: `${bridgeUrl}/api/webhooks/${bundle.subscribeData.id}`,
     method: "DELETE",
@@ -89,25 +85,40 @@ export const unsubscribe = (async (z: ZObject, bundle: Bundle) => {
 }) satisfies WebhookTriggerPerformUnsubscribe;
 
 /**
- * Verifies the webhook signature from a bundle, throwing on failure.
- * Use this in custom perform functions that don't go through `makePerform`.
+ * Returns the signing secret from subscribeData (set during performSubscribe).
+ * Throws if missing -- this means the Zap wasn't properly subscribed.
+ */
+export function getSigningSecret(bundle: Bundle): string {
+  const sub = (bundle.subscribeData ?? {}) as Record<string, unknown>;
+  const secret = sub.signingSecret as string | undefined;
+  if (!secret) {
+    throw new Error("MissingSigningSecret");
+  }
+  return secret;
+}
+
+/**
+ * Verifies the webhook signature from the bundle; throws on failure.
  */
 export function assertValidSignature(z: ZObject, bundle: Bundle): void {
   const headers = (bundle.rawRequest?.headers ?? {}) as Record<string, string>;
   const rawBody = bundle.rawRequest?.content ?? "";
-  const subData = (bundle.subscribeData ?? {}) as Record<string, unknown>;
-  const signingSecret = subData.signingSecret as string | undefined;
-
-  if (
-    !verifySignature(
-      rawBody,
-      signingSecret,
-      headers["x-photon-signature"] ?? headers["X-Photon-Signature"],
-      headers["x-photon-timestamp"] ?? headers["X-Photon-Timestamp"],
-    )
-  ) {
+  let signingSecret: string;
+  try {
+    signingSecret = getSigningSecret(bundle);
+  } catch {
     throw new z.errors.Error(
-      "Invalid webhook signature — request rejected.",
+      "Signing secret not found. This Zap may not be properly subscribed. Try turning the Zap off and on again.",
+      "MissingSigningSecret",
+      403,
+    );
+  }
+  const sig =
+    headers["x-photon-signature"] ?? headers["X-Photon-Signature"];
+  const ts = headers["x-photon-timestamp"] ?? headers["X-Photon-Timestamp"];
+  if (!verifySignature(rawBody, signingSecret, sig, ts)) {
+    throw new z.errors.Error(
+      "Invalid or missing webhook signature. Ensure the bridge sends X-Photon-Signature and X-Photon-Timestamp headers.",
       "SignatureError",
       403,
     );

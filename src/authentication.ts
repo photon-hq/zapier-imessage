@@ -6,22 +6,34 @@ import type {
 } from "zapier-platform-core";
 
 /**
- * Strips any trailing slashes from a URL and collapses double slashes in the
- * path portion.  This is applied both in the beforeRequest middleware (for all
- * requests) and explicitly inside the auth test perform function (to guard
- * against the Zapier hosted-platform behaviour where the {{curlies}} template
- * is resolved by the backend *before* the app's beforeRequest chain runs,
- * meaning our middleware never gets a chance to normalise the URL).
+ * Canonical URL for the Photon Webhook Bridge. When a Zap with an instant
+ * trigger turns ON, performSubscribe POSTs here with { serverUrl, apiKey,
+ * webhookUrl } and gets back { id, signingSecret }. Fully automatic.
+ * @see https://webhook.photon.codes/
+ */
+export const WEBHOOK_BRIDGE_URL = "https://webhook.photon.codes";
+
+/**
+ * Strips trailing slashes and collapses double slashes in the path portion,
+ * leaving the protocol double-slash intact.
  */
 export const normalizeUrl = (url: string): string =>
   (url || "")
-    // Strip trailing slashes from the whole URL first
     .replace(/\/+$/, "")
-    // Collapse any double (or more) slashes in the path, but leave the
-    // protocol double-slash (https://) intact
     .replace(/(https?:\/\/)\/+/g, "$1")
     .replace(/([^:])\/\/+/g, "$1/");
 
+/** True when the URL points to the webhook bridge (credentials go in body, not header). */
+function isBridgeRequest(url: string): boolean {
+  const normalized = normalizeUrl(url);
+  const bridge = normalizeUrl(WEBHOOK_BRIDGE_URL);
+  return normalized === bridge || normalized.startsWith(bridge + "/");
+}
+
+/**
+ * Adds X-API-Key to Photon server requests. Bridge requests are skipped
+ * because the bridge receives credentials in the POST body instead.
+ */
 export const addApiKeyToHeader: BeforeRequestMiddleware = (
   request,
   _z,
@@ -30,7 +42,9 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   if (request.url) {
     request.url = normalizeUrl(request.url);
   }
-
+  if (request.url && isBridgeRequest(request.url)) {
+    return request;
+  }
   request.headers = {
     ...request.headers,
     "X-API-Key": bundle.authData.apiKey as string,
@@ -38,104 +52,58 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   return request;
 };
 
-export const WEBHOOK_BRIDGE_URL = "https://webhooks.photon.codes";
-
 /**
- * Credentials flow: user enters Endpoint (server URL) + API Key. When they use
- * a trigger and turn the Zap on, we take these plus Zapier's webhook URL (the
- * endpoint that receives events), POST to webhooks.photon.codes, get the
- * signing secret back, and use it to verify incoming webhooks. All in the background.
+ * Auth test: validate Endpoint + API Key against the Photon server.
+ * No bridge interaction here -- the bridge is called automatically in
+ * performSubscribe when a Zap turns on.
  */
 const authTest = async (z: ZObject, bundle: Bundle) => {
   const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
-  const bridgeUrl = normalizeUrl(
-    (bundle.authData.webhookBridgeUrl as string) || WEBHOOK_BRIDGE_URL,
-  );
 
-  const serverResponse = await z.request({
+  const response = await z.request({
     url: `${baseUrl}/api/v1/server/info`,
     method: "GET",
     skipThrowForStatus: true,
   });
 
-  if (serverResponse.status === 401 || serverResponse.status === 403) {
+  if (response.status === 401 || response.status === 403) {
     throw new z.errors.Error(
-      "Authentication failed: invalid API key.",
+      "Invalid API key.",
       "AuthenticationError",
-      serverResponse.status,
+      response.status,
     );
   }
 
-  if (serverResponse.status === 404) {
+  if (response.status === 404) {
     throw new z.errors.Error(
-      `Could not reach the Photon server at "${baseUrl}". Check that the Server URL is correct and the server is running.`,
+      `Cannot reach Photon server at "${baseUrl}". Check the Endpoint URL and that the server is running.`,
       "NotFoundError",
-      serverResponse.status,
+      response.status,
     );
   }
 
-  if (serverResponse.status >= 400) {
+  if (response.status >= 400) {
     throw new z.errors.Error(
-      `Server returned an unexpected error (HTTP ${serverResponse.status}). Verify your Server URL and API Key.`,
+      `Server error (HTTP ${response.status}). Verify Endpoint and API Key.`,
       "ApiError",
-      serverResponse.status,
+      response.status,
     );
   }
 
-  const apiKey = bundle.authData.apiKey as string;
-  const testWebhookUrl = "https://zapier-connection-test.invalid";
-  const bridgeSubscribe = await z.request({
-    url: `${bridgeUrl}/api/webhooks`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: {
-      serverUrl: baseUrl,
-      apiKey,
-      webhookUrl: testWebhookUrl,
-    },
-    skipThrowForStatus: true,
-  });
-
-  if (bridgeSubscribe.status >= 200 && bridgeSubscribe.status < 300) {
-    const data = bridgeSubscribe.data as { id?: string };
-    if (data?.id) {
-      await z.request({
-        url: `${bridgeUrl}/api/webhooks/${data.id}`,
-        method: "DELETE",
-        skipThrowForStatus: true,
-      });
-    }
-  } else if (bridgeSubscribe.status === 404) {
+  const body = response.data;
+  const bodyStr = typeof body === "string" ? body : JSON.stringify(body ?? "");
+  if (
+    bodyStr.toLowerCase().includes("github") ||
+    (typeof body === "string" && body.trimStart().startsWith("<!"))
+  ) {
     throw new z.errors.Error(
-      `Webhook Bridge at "${bridgeUrl}" does not expose POST /api/webhooks. ` +
-        "Use a bridge that supports programmatic webhook registration (e.g. github.com/photon-hq/webhook).",
-      "NotFoundError",
-      404,
-    );
-  } else if (bridgeSubscribe.status === 401 || bridgeSubscribe.status === 403) {
-    throw new z.errors.Error(
-      "Webhook Bridge rejected the request. Check that your Server URL and API Key are correct.",
-      "AuthenticationError",
-      bridgeSubscribe.status,
-    );
-  } else if (bridgeSubscribe.status >= 400) {
-    const msg =
-      (bridgeSubscribe.data as { message?: string })?.message ||
-      `Bridge returned HTTP ${bridgeSubscribe.status}.`;
-    throw new z.errors.Error(
-      `Webhook Bridge error: ${msg} Ensure the bridge URL and your credentials are correct.`,
+      "Endpoint URL looks wrong (got a web page). Use your Photon iMessage server URL only (e.g. https://yourserver.imsgd.photon.codes).",
       "ApiError",
-      bridgeSubscribe.status,
+      400,
     );
   }
 
-  return {
-    ...(typeof serverResponse.data === "object" && serverResponse.data !== null
-      ? serverResponse.data
-      : {}),
-    serverUrl: baseUrl,
-    webhookBridgeUrl: bridgeUrl,
-  };
+  return { serverUrl: baseUrl };
 };
 
 const authentication: Authentication = {
@@ -148,7 +116,7 @@ const authentication: Authentication = {
       required: true,
       default: "https://example.imsgd.photon.codes",
       helpText:
-        "Your Photon iMessage server URL. We use this plus your API key to register with webhooks.photon.codes so events can reach your Zaps.",
+        "Your Photon iMessage server URL (e.g. https://yourserver.imsgd.photon.codes). Webhook configuration and signing are handled automatically when you turn on a Zap with an instant trigger.",
     },
     {
       key: "apiKey",
@@ -157,10 +125,9 @@ const authentication: Authentication = {
       required: true,
       computed: false,
       helpText:
-        "API key for the endpoint above. When you turn on a Zap, we send this and Zapier's webhook URL to webhooks.photon.codes and get a signing secret to verify deliveries.",
+        "API key for your Photon server.",
     },
   ],
-  // Use a function perform so we control URL normalisation and error messages.
   test: authTest,
   connectionLabel: "{{bundle.authData.serverUrl}}",
 };
