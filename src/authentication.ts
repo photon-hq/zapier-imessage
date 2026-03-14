@@ -115,7 +115,7 @@ const authentication: Authentication = {
       type: "string",
       required: true,
       helpText:
-        "From https://webhook.photon.codes — after you add your trigger step to a Zap and copy the Webhook URL Zapier shows, go to webhook.photon.codes, enter your Server URL, API Key, and that Webhook URL. The bridge will give you a Signing Secret. Paste it here.",
+        "From https://webhook.photon.codes — try turning on your Zap first; if the Signing Secret is missing, the error message will show you the exact Webhook URL to use. Go to webhook.photon.codes, enter your Server URL, API Key, and that Webhook URL. Copy the Signing Secret the bridge gives you and paste it here.",
     },
   ],
   test: authTest,

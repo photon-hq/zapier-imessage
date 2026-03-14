@@ -52,11 +52,21 @@ export function verifySignature(
 }
 
 /**
- * No-op: the user configures the webhook manually at webhook.photon.codes.
- * Zapier requires performSubscribe to return an object; we return a marker.
+ * The bridge (webhook.photon.codes) is a web form — no programmatic API.
+ * We store the Zapier webhook URL in subscribeData so the user can find it
+ * if needed. The user must have already configured the webhook at the bridge
+ * and pasted the Signing Secret into their connection for events to flow.
  */
-export const subscribe = (async (_z: ZObject, _bundle: Bundle) => {
-  return { id: "manual" };
+export const subscribe = (async (z: ZObject, bundle: Bundle) => {
+  const signingSecret = (bundle.authData.signingSecret as string)?.trim();
+  if (!signingSecret) {
+    throw new z.errors.Error(
+      `Before turning on this Zap, go to https://webhook.photon.codes and add a webhook with your Server URL, API Key, and this Webhook URL: ${bundle.targetUrl} — then paste the Signing Secret you receive into your connection settings and try again.`,
+      "SetupRequired",
+      400,
+    );
+  }
+  return { id: "manual", webhookUrl: bundle.targetUrl };
 }) satisfies WebhookTriggerPerformSubscribe;
 
 /**
