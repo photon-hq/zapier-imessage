@@ -1,3 +1,18 @@
+/**
+ * Webhook trigger lifecycle (automatic when Zap is ON). Bridge: github.com/photon-hq/webhook.
+ *
+ * 1) Subscribe (Zap ON): We POST to bridge with { serverUrl, apiKey, webhookUrl }.
+ *    Bridge must return { id, signingSecret }. Bridge generates the signing secret;
+ *    we store it and use it only to verify incoming requests. If the bridge only
+ *    has a web form today, it needs POST /api/webhooks (and DELETE /api/webhooks/:id)
+ *    so Zapier can subscribe without manual steps.
+ *
+ * 2) Bridge forwards: POST to webhookUrl with body { event, data }, headers
+ *    X-Photon-Signature (v0=<hmac-hex>), X-Photon-Timestamp (unix sec).
+ *    HMAC = HMAC-SHA256(signingSecret, "v0:" + timestamp + ":" + rawBody). We verify.
+ *
+ * 3) Unsubscribe (Zap OFF): We DELETE bridge /api/webhooks/:id.
+ */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type {
   ZObject,
@@ -5,7 +20,7 @@ import type {
   WebhookTriggerPerformSubscribe,
   WebhookTriggerPerformUnsubscribe,
 } from "zapier-platform-core";
-import { normalizeUrl } from "../authentication.js";
+import { normalizeUrl, WEBHOOK_BRIDGE_URL } from "../authentication.js";
 
 const MAX_TIMESTAMP_DRIFT_SECONDS = 300;
 
@@ -39,14 +54,9 @@ export function verifySignature(
 }
 
 export const subscribe = (async (z: ZObject, bundle: Bundle) => {
-  const bridgeUrl = normalizeUrl(bundle.authData.webhookBridgeUrl as string);
-  if (!bridgeUrl) {
-    throw new z.errors.Error(
-      "Webhook Bridge URL is required. Please update your Photon iMessage connection.",
-      "ConfigurationError",
-    );
-  }
-
+  const bridgeUrl = normalizeUrl(
+    (bundle.authData.webhookBridgeUrl as string) || WEBHOOK_BRIDGE_URL,
+  );
   const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
   const response = await z.request({
     url: `${bridgeUrl}/api/webhooks`,
@@ -63,8 +73,10 @@ export const subscribe = (async (z: ZObject, bundle: Bundle) => {
 }) satisfies WebhookTriggerPerformSubscribe;
 
 export const unsubscribe = (async (z: ZObject, bundle: Bundle) => {
-  const bridgeUrl = normalizeUrl(bundle.authData.webhookBridgeUrl as string);
-  if (!bridgeUrl || !bundle.subscribeData?.id) {
+  const bridgeUrl = normalizeUrl(
+    (bundle.authData.webhookBridgeUrl as string) || WEBHOOK_BRIDGE_URL,
+  );
+  if (!bundle.subscribeData?.id) {
     return {};
   }
 
