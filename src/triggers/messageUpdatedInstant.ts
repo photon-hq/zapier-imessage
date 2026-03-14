@@ -63,7 +63,7 @@ export default defineTrigger({
   display: {
     label: "Message Updated",
     description:
-      "Triggers when an iMessage is edited or updated on your Photon server.",
+      "Triggers when an iMessage is edited or updated on your Photon server via the Webhook Bridge. Test uses recent messages; when the Zap is ON, runs are delivered in real time by webhook.",
   },
 
   operation: {
