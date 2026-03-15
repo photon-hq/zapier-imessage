@@ -19,8 +19,12 @@ export const normalizeUrl = (url: string): string =>
     .replace(/([^:])\/\/+/g, "$1/");
 
 /**
- * Adds X-API-Key to all outbound requests to the user's Photon server.
+ * Adds X-API-Key to outbound requests, but skips it for bridge URLs
+ * (the bridge authenticates via the JSON body, not headers).
  */
+const isBridgeRequest = (url: string) =>
+  url.startsWith(WEBHOOK_BRIDGE_URL);
+
 export const addApiKeyToHeader: BeforeRequestMiddleware = (
   request,
   _z,
@@ -29,10 +33,12 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   if (request.url) {
     request.url = normalizeUrl(request.url);
   }
-  request.headers = {
-    ...request.headers,
-    "X-API-Key": bundle.authData.apiKey as string,
-  };
+  if (!isBridgeRequest(request.url ?? "")) {
+    request.headers = {
+      ...request.headers,
+      "X-API-Key": bundle.authData.apiKey as string,
+    };
+  }
   return request;
 };
 
@@ -107,15 +113,7 @@ const authentication: Authentication = {
       required: true,
       computed: false,
       helpText:
-        "API key for your Photon server.",
-    },
-    {
-      key: "signingSecret",
-      label: "Signing Secret",
-      type: "string",
-      required: true,
-      helpText:
-        "From https://webhook.photon.codes — try turning on your Zap first; if the Signing Secret is missing, the error message will show you the exact Webhook URL to use. Go to webhook.photon.codes, enter your Server URL, API Key, and that Webhook URL. Copy the Signing Secret the bridge gives you and paste it here.",
+        "API key for your Photon server. When you turn on a Zap, the webhook is registered automatically and events flow in real-time.",
     },
   ],
   test: authTest,

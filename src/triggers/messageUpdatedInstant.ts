@@ -63,7 +63,7 @@ export default defineTrigger({
   display: {
     label: "Message Updated",
     description:
-      "Triggers when an iMessage is edited or updated. Setup: add this trigger, copy the Webhook URL Zapier shows, then at https://webhook.photon.codes enter your Server URL, API Key, and that Webhook URL. Paste the Signing Secret from the bridge into your connection.",
+      "Triggers instantly when an iMessage is edited or updated. Webhook configuration and signing are handled automatically when the Zap is turned on.",
   },
 
   operation: {
