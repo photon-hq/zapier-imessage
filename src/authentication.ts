@@ -28,12 +28,15 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   _z,
   bundle,
 ) => {
-  const url = request.url ?? "";
+  const url = normalizeUrl(request.url ?? "");
   const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  const isBridge = url.startsWith(WEBHOOK_BRIDGE_URL);
   const isServerRequest = url.startsWith(serverUrl);
 
+  if (isServerRequest || isBridge) {
+    request.url = url;
+  }
   if (isServerRequest) {
-    request.url = normalizeUrl(url);
     request.headers = {
       ...request.headers,
       "X-API-Key": bundle.authData.apiKey as string,
