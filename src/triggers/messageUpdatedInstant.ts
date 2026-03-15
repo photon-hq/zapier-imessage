@@ -34,7 +34,6 @@ const performList = (async (z: ZObject, bundle: Bundle) => {
     previousText: msg.previousText,
     editedAt: msg.dateModified,
     sender: msg.handle?.address,
-    chatGuid: msg.chats?.[0],
     dateCreated: msg.dateCreated,
     isFromMe: msg.isFromMe ?? false,
   }));
@@ -48,10 +47,6 @@ const perform = makePerform("updated-message", (msg) => ({
   editedAt: msg.editedAt ?? msg.dateModified ?? undefined,
   sender:
     (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
-  chatGuid:
-    Array.isArray(msg.chats) && msg.chats.length > 0
-      ? msg.chats[0]
-      : msg.chatGuid,
   dateCreated: msg.dateCreated,
   isFromMe: msg.isFromMe ?? false,
 }));
@@ -80,7 +75,6 @@ export default defineTrigger({
       previousText: "Original message before edit",
       editedAt: 1710000000000,
       sender: "+11234567890",
-      chatGuid: "iMessage;-;+11234567890",
       dateCreated: 1700000000000,
       isFromMe: false,
     },
@@ -91,7 +85,6 @@ export default defineTrigger({
       { key: "previousText", label: "Previous Text (before edit)" },
       { key: "editedAt", label: "Edited At", type: "integer" },
       { key: "sender", label: "Sender" },
-      { key: "chatGuid", label: "Chat" },
       { key: "dateCreated", label: "Date", type: "integer" },
       { key: "isFromMe", label: "Is From Me", type: "boolean" },
     ],

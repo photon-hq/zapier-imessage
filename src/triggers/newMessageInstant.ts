@@ -11,10 +11,6 @@ const perform = makePerform("new-message", (msg) => ({
   text: msg.text,
   sender:
     (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
-  chatGuid:
-    Array.isArray(msg.chats) && msg.chats.length > 0
-      ? msg.chats[0]
-      : msg.chatGuid,
   dateCreated: msg.dateCreated,
   isFromMe: msg.isFromMe ?? false,
   hasAttachments: Array.isArray(msg.attachments)
@@ -49,7 +45,6 @@ const performList = (async (z, bundle) => {
       guid: msg.guid,
       text: msg.text,
       sender: msg.handle?.address,
-      chatGuid: msg.chats?.[0],
       dateCreated: msg.dateCreated,
       isFromMe: msg.isFromMe,
       hasAttachments: (msg.attachments?.length ?? 0) > 0,
@@ -78,7 +73,6 @@ export default defineTrigger({
       guid: "p:0/sample-new-msg-1",
       text: "Hello from iMessage!",
       sender: "+11234567890",
-      chatGuid: "iMessage;-;+11234567890",
       dateCreated: 1700000000000,
       isFromMe: false,
       hasAttachments: false,
@@ -88,7 +82,6 @@ export default defineTrigger({
       { key: "guid", label: "Message ID" },
       { key: "text", label: "Text" },
       { key: "sender", label: "Sender" },
-      { key: "chatGuid", label: "Chat" },
       { key: "dateCreated", label: "Date", type: "integer" },
       { key: "isFromMe", label: "Is From Me", type: "boolean" },
       { key: "hasAttachments", label: "Has Attachments", type: "boolean" },
