@@ -19,26 +19,27 @@ export const normalizeUrl = (url: string): string =>
     .replace(/([^:])\/\/+/g, "$1/");
 
 /**
- * Adds X-API-Key to outbound requests, but skips it for bridge URLs
- * (the bridge authenticates via the JSON body, not headers).
+ * Adds X-API-Key and normalizes the URL only for requests aimed at the
+ * user's Photon server. External URLs (file downloads, bridge calls) are
+ * left untouched so we don't mangle signed URLs or inject extra headers.
  */
-const isBridgeRequest = (url: string) =>
-  url.startsWith(WEBHOOK_BRIDGE_URL);
-
 export const addApiKeyToHeader: BeforeRequestMiddleware = (
   request,
   _z,
   bundle,
 ) => {
-  if (request.url) {
-    request.url = normalizeUrl(request.url);
-  }
-  if (!isBridgeRequest(request.url ?? "")) {
+  const url = request.url ?? "";
+  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  const isServerRequest = url.startsWith(serverUrl);
+
+  if (isServerRequest) {
+    request.url = normalizeUrl(url);
     request.headers = {
       ...request.headers,
       "X-API-Key": bundle.authData.apiKey as string,
     };
   }
+
   return request;
 };
 
