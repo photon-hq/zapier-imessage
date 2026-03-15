@@ -63,7 +63,7 @@ export default defineTrigger({
   display: {
     label: "New Message Received",
     description:
-      "Triggers instantly when a new iMessage is received. Webhook configuration and signing are handled automatically when the Zap is turned on.",
+      "Triggers when a new iMessage is received on your Photon server.",
   },
 
   operation: {
