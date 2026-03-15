@@ -3,7 +3,7 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
-import { requireInboundMessage } from "./inboundCheck.js";
+import { requireInboundMessage, normalizeChatGuid } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -47,7 +47,8 @@ const inputFields = defineInputFields([
 ]);
 
 const perform = (async (z, bundle) => {
-  await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
+  const chatGuid = normalizeChatGuid(bundle.inputData.chatGuid as string);
+  await requireInboundMessage(z, bundle, chatGuid);
   const raw = bundle.inputData.scheduledFor;
   let scheduledFor: number;
   const num = typeof raw === "string" ? parseInt(raw.trim(), 10) : Number(raw);
@@ -70,7 +71,7 @@ const perform = (async (z, bundle) => {
     body: {
       type: "send-message",
       payload: {
-        chatGuid: bundle.inputData.chatGuid,
+        chatGuid,
         message: bundle.inputData.message,
         method: "private-api",
       },

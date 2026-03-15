@@ -3,7 +3,7 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
-import { requireInboundMessage } from "./inboundCheck.js";
+import { requireInboundMessage, normalizeChatGuid } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -44,13 +44,14 @@ const inputFields = defineInputFields([
 ]);
 
 const perform = (async (z, bundle) => {
-  await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
+  const chatGuid = normalizeChatGuid(bundle.inputData.chatGuid as string);
+  await requireInboundMessage(z, bundle, chatGuid);
   const response = await z.request({
     url: `${bundle.authData.serverUrl}/api/v1/message/react`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: {
-      chatGuid: bundle.inputData.chatGuid,
+      chatGuid,
       selectedMessageGuid: bundle.inputData.messageGuid,
       reaction: bundle.inputData.reaction,
       partIndex: 0,

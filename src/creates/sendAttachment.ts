@@ -5,7 +5,7 @@ import {
 } from "zapier-platform-core";
 import { randomUUID } from "node:crypto";
 import FormData from "form-data";
-import { requireInboundMessage } from "./inboundCheck.js";
+import { requireInboundMessage, normalizeChatGuid } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -41,7 +41,8 @@ const inputFields = defineInputFields([
 ]);
 
 const perform = (async (z, bundle) => {
-  await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
+  const chatGuid = normalizeChatGuid(bundle.inputData.chatGuid as string);
+  await requireInboundMessage(z, bundle, chatGuid);
   const fileUrl = bundle.inputData.fileUrl as string;
   let fileResponse: { content?: string; buffer?: () => Promise<Buffer>; status?: number };
   try {
@@ -88,7 +89,7 @@ const perform = (async (z, bundle) => {
     "attachment";
 
   const form = new FormData();
-  form.append("chatGuid", bundle.inputData.chatGuid as string);
+  form.append("chatGuid", chatGuid);
   form.append("attachment", buffer, { filename: fileName });
   form.append("name", fileName);
   form.append("tempGuid", randomUUID());
@@ -108,7 +109,7 @@ const perform = (async (z, bundle) => {
   const out = data?.data ?? data;
   const result = (typeof out === "object" && out !== null ? out : {}) as Record<string, unknown>;
   return {
-    id: result.guid ?? result.id ?? `${bundle.inputData.chatGuid}-attachment`,
+    id: result.guid ?? result.id ?? `${chatGuid}-attachment`,
     ...result,
   };
 }) satisfies CreatePerform<typeof inputFields>;
