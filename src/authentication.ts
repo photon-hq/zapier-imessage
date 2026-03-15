@@ -5,12 +5,7 @@ import type {
   Bundle,
 } from "zapier-platform-core";
 
-/**
- * Canonical URL for the Photon Webhook Bridge. When a Zap with an instant
- * trigger turns ON, performSubscribe POSTs here with { serverUrl, apiKey,
- * webhookUrl } and gets back { id, signingSecret }. Fully automatic.
- * @see https://webhook.photon.codes/
- */
+/** @see https://webhook.photon.codes/ */
 export const WEBHOOK_BRIDGE_URL = "https://webhook.photon.codes";
 
 /**
@@ -23,17 +18,13 @@ export const normalizeUrl = (url: string): string =>
     .replace(/(https?:\/\/)\/+/g, "$1")
     .replace(/([^:])\/\/+/g, "$1/");
 
-/** True when the URL points to the webhook bridge (credentials go in body, not header). */
-function isBridgeRequest(url: string): boolean {
-  const normalized = normalizeUrl(url);
-  const bridge = normalizeUrl(WEBHOOK_BRIDGE_URL);
-  return normalized === bridge || normalized.startsWith(bridge + "/");
-}
-
 /**
- * Adds X-API-Key to Photon server requests. Bridge requests are skipped
- * because the bridge receives credentials in the POST body instead.
+ * Adds X-API-Key to outbound requests, but skips it for bridge URLs
+ * (the bridge authenticates via the JSON body, not headers).
  */
+const isBridgeRequest = (url: string) =>
+  url.startsWith(WEBHOOK_BRIDGE_URL);
+
 export const addApiKeyToHeader: BeforeRequestMiddleware = (
   request,
   _z,
@@ -42,20 +33,17 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
   if (request.url) {
     request.url = normalizeUrl(request.url);
   }
-  if (request.url && isBridgeRequest(request.url)) {
-    return request;
+  if (!isBridgeRequest(request.url ?? "")) {
+    request.headers = {
+      ...request.headers,
+      "X-API-Key": bundle.authData.apiKey as string,
+    };
   }
-  request.headers = {
-    ...request.headers,
-    "X-API-Key": bundle.authData.apiKey as string,
-  };
   return request;
 };
 
 /**
  * Auth test: validate Endpoint + API Key against the Photon server.
- * No bridge interaction here -- the bridge is called automatically in
- * performSubscribe when a Zap turns on.
  */
 const authTest = async (z: ZObject, bundle: Bundle) => {
   const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
@@ -116,7 +104,7 @@ const authentication: Authentication = {
       required: true,
       default: "https://example.imsgd.photon.codes",
       helpText:
-        "Your Photon iMessage server URL (e.g. https://yourserver.imsgd.photon.codes). Webhook configuration and signing are handled automatically when you turn on a Zap with an instant trigger.",
+        "Your Photon iMessage server URL (e.g. https://yourserver.imsgd.photon.codes).",
     },
     {
       key: "apiKey",
@@ -125,7 +113,7 @@ const authentication: Authentication = {
       required: true,
       computed: false,
       helpText:
-        "API key for your Photon server.",
+        "API key for your Photon server. When you turn on a Zap, the webhook is registered automatically and events flow in real-time.",
     },
   ],
   test: authTest,

@@ -5,3 +5,4 @@ build/
 .zapierapprc
 *.log
 .DS_Store
+BLOG_DRAFT.md
