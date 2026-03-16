@@ -16,7 +16,7 @@ const perform = makePerform("new-message", (msg) => ({
   hasAttachments: Array.isArray(msg.attachments)
     ? msg.attachments.length > 0
     : false,
-}));
+}), (msg) => !msg.isFromMe);
 
 const performList = (async (z, bundle) => {
   const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);

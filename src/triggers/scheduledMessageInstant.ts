@@ -3,7 +3,7 @@ import {
   type WebhookTriggerPerformList,
 } from "zapier-platform-core";
 import type { ZObject, Bundle } from "zapier-platform-core";
-import { subscribe, unsubscribe, assertValidSignature } from "./webhookHelpers.js";
+import { subscribe, unsubscribe } from "./webhookHelpers.js";
 import { normalizeUrl } from "../authentication.js";
 
 const performList = (async (z: ZObject, bundle: Bundle) => {
@@ -50,9 +50,7 @@ const SCHEDULED_EVENTS = new Set([
   "scheduled-message-error",
 ]);
 
-const perform = async (z: ZObject, bundle: Bundle) => {
-  assertValidSignature(z, bundle);
-
+const perform = async (_z: ZObject, bundle: Bundle) => {
   const payload = bundle.cleanedRequest as {
     event?: string;
     data?: Record<string, unknown>;
