@@ -2,41 +2,10 @@ import {
   defineTrigger,
   type WebhookTriggerPerformList,
 } from "zapier-platform-core";
-import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
-import { normalizeUrl } from "../authentication.js";
 
-const performList = (async (z: ZObject, bundle: Bundle) => {
-  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
-  const response = await z.request<{
-    data?: Array<{
-      guid: string;
-      text: string;
-      handle?: { address: string };
-      chats?: string[];
-      dateCreated: number;
-      isFromMe: boolean;
-      dateModified?: number;
-      previousText?: string;
-    }>;
-  }>({
-    url: `${serverUrl}/api/v1/message/query`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: { sort: "DESC", limit: 10 },
-  });
-
-  const messages = response.data?.data ?? [];
-  return messages.map((msg) => ({
-    id: msg.guid,
-    guid: msg.guid,
-    text: msg.text,
-    previousText: msg.previousText,
-    editedAt: msg.dateModified,
-    sender: msg.handle?.address,
-    dateCreated: msg.dateCreated,
-    isFromMe: msg.isFromMe ?? false,
-  }));
+const performList = (async () => {
+  return [];
 }) satisfies WebhookTriggerPerformList;
 
 /**
