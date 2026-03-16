@@ -44,7 +44,9 @@ const performList = (async (z: ZObject, bundle: Bundle) => {
  * and other status-only updates that the server also sends as
  * "updated-message" events.
  */
-function isActualEdit(msg: Record<string, unknown>): boolean {
+function shouldTrigger(msg: Record<string, unknown>): boolean {
+  if (msg.isFromMe) return false;
+
   if (msg.dateEdited || msg.dateModified) return true;
   if (
     typeof msg.previousText === "string" &&
@@ -69,7 +71,7 @@ const perform = makePerform(
     dateCreated: msg.dateCreated,
     isFromMe: msg.isFromMe ?? false,
   }),
-  isActualEdit,
+  shouldTrigger,
 );
 
 export default defineTrigger({
