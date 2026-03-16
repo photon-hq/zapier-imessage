@@ -39,17 +39,38 @@ const performList = (async (z: ZObject, bundle: Bundle) => {
   }));
 }) satisfies WebhookTriggerPerformList;
 
-const perform = makePerform("updated-message", (msg) => ({
-  id: (msg.guid as string) || `hook-${Date.now()}`,
-  guid: msg.guid,
-  text: msg.text,
-  previousText: msg.previousText ?? msg.originalText ?? undefined,
-  editedAt: msg.editedAt ?? msg.dateModified ?? undefined,
-  sender:
-    (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
-  dateCreated: msg.dateCreated,
-  isFromMe: msg.isFromMe ?? false,
-}));
+/**
+ * Only fire for genuine edits — ignore delivery receipts, read receipts,
+ * and other status-only updates that the server also sends as
+ * "updated-message" events.
+ */
+function isActualEdit(msg: Record<string, unknown>): boolean {
+  if (msg.dateEdited || msg.dateModified) return true;
+  if (
+    typeof msg.previousText === "string" &&
+    typeof msg.text === "string" &&
+    msg.previousText !== msg.text
+  ) {
+    return true;
+  }
+  return false;
+}
+
+const perform = makePerform(
+  "updated-message",
+  (msg) => ({
+    id: (msg.guid as string) || `hook-${Date.now()}`,
+    guid: msg.guid,
+    text: msg.text,
+    previousText: msg.previousText ?? msg.originalText ?? undefined,
+    editedAt: msg.editedAt ?? msg.dateModified ?? undefined,
+    sender:
+      (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
+    dateCreated: msg.dateCreated,
+    isFromMe: msg.isFromMe ?? false,
+  }),
+  isActualEdit,
+);
 
 export default defineTrigger({
   key: "message_updated_instant",
