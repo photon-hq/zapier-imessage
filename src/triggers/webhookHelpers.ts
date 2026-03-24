@@ -3,12 +3,11 @@
  *
  * Bridge API contract:
  *   POST   /api/webhooks       { serverUrl, apiKey, webhookUrl } → { id, signingSecret }
+ *   GET    /api/webhooks?serverUrl=...&apiKey=... → [{ id, webhookUrl, ... }]
  *   DELETE /api/webhooks/:id   → 204
  *
- * Incoming webhooks: Bridge POSTs to Zapier with body { event, data },
- * headers X-Photon-Signature (v0=<hmac-hex>), X-Photon-Timestamp (unix sec).
+ * Incoming webhooks: Bridge POSTs to Zapier with body { event, data }.
  */
-import { createHmac, timingSafeEqual } from "node:crypto";
 import type {
   ZObject,
   Bundle,
@@ -17,45 +16,46 @@ import type {
 } from "zapier-platform-core";
 import { WEBHOOK_BRIDGE_URL, normalizeUrl } from "../authentication.js";
 
-const MAX_TIMESTAMP_DRIFT_SECONDS = 300;
-
 /**
- * Verifies the HMAC-SHA256 signature on an incoming webhook payload.
- * Signature format: v0=<hex>
- * Signed base string: v0:<timestamp>:<rawBody>
+ * Removes all existing webhooks for a given server from the bridge.
+ * Called before creating a new one to prevent stale subscriptions.
  */
-export function verifySignature(
-  rawBody: string,
-  signingSecret: string | undefined,
-  signature: string | undefined,
-  timestamp: string | undefined,
-): boolean {
-  if (!signingSecret) return false;
-  if (!signature || !timestamp) return false;
+async function cleanupExistingWebhooks(
+  z: ZObject,
+  serverUrl: string,
+  apiKey: string,
+): Promise<void> {
+  const listResp = await z.request({
+    url: `${WEBHOOK_BRIDGE_URL}/api/webhooks`,
+    method: "GET",
+    params: { serverUrl, apiKey },
+    skipThrowForStatus: true,
+  });
 
-  const ts = Number(timestamp);
-  if (Number.isNaN(ts)) return false;
+  if (listResp.status !== 200) return;
 
-  const age = Math.abs(Math.floor(Date.now() / 1000) - ts);
-  if (age > MAX_TIMESTAMP_DRIFT_SECONDS) return false;
+  const webhooks = listResp.data as Array<{ id: string }>;
+  if (!Array.isArray(webhooks)) return;
 
-  const sigBase = `v0:${timestamp}:${rawBody}`;
-  const expected = `v0=${createHmac("sha256", signingSecret).update(sigBase).digest("hex")}`;
-
-  try {
-    return timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
-  } catch {
-    return false;
+  for (const wh of webhooks) {
+    await z.request({
+      url: `${WEBHOOK_BRIDGE_URL}/api/webhooks/${wh.id}`,
+      method: "DELETE",
+      skipThrowForStatus: true,
+    });
   }
 }
 
 /**
  * Registers a webhook with the Photon Webhook Bridge.
- * Returns { id, signingSecret } stored in subscribeData.
+ * First removes any stale webhooks for this server to ensure exactly one
+ * subscription exists.
  */
 export const subscribe = (async (z: ZObject, bundle: Bundle) => {
   const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
   const apiKey = (bundle.authData.apiKey as string)?.trim();
+
+  await cleanupExistingWebhooks(z, serverUrl, apiKey);
 
   const response = await z.request({
     url: `${WEBHOOK_BRIDGE_URL}/api/webhooks`,
@@ -79,89 +79,60 @@ export const subscribe = (async (z: ZObject, bundle: Bundle) => {
 
   if (response.status >= 400) {
     const body = response.data as Record<string, unknown> | undefined;
-    const msg = (body?.error as string) || `Bridge returned HTTP ${response.status}`;
+    const msg =
+      (body?.error as string) || `Bridge returned HTTP ${response.status}`;
     throw new z.errors.Error(msg, "BridgeError", response.status);
   }
 
-  const data = response.data as { id: string; signingSecret: string };
-  return { id: data.id, signingSecret: data.signingSecret };
+  const data = response.data as { id: string };
+  return { id: data.id };
 }) satisfies WebhookTriggerPerformSubscribe;
 
 /**
  * Removes the webhook registration from the Photon Webhook Bridge.
+ * Also cleans up any other webhooks for this server as a safety net.
  */
 export const unsubscribe = (async (z: ZObject, bundle: Bundle) => {
   const webhookId = (bundle.subscribeData as Record<string, unknown>)?.id;
-  if (!webhookId) return {};
+  if (webhookId) {
+    await z.request({
+      url: `${WEBHOOK_BRIDGE_URL}/api/webhooks/${webhookId}`,
+      method: "DELETE",
+      skipThrowForStatus: true,
+    });
+  }
 
-  await z.request({
-    url: `${WEBHOOK_BRIDGE_URL}/api/webhooks/${webhookId}`,
-    method: "DELETE",
-    skipThrowForStatus: true,
-  });
+  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  const apiKey = (bundle.authData.apiKey as string)?.trim();
+  await cleanupExistingWebhooks(z, serverUrl, apiKey);
 
   return {};
 }) satisfies WebhookTriggerPerformUnsubscribe;
 
 /**
- * Returns the signing secret from subscribeData (set during performSubscribe).
- */
-export function getSigningSecret(bundle: Bundle): string {
-  const sub = (bundle.subscribeData ?? {}) as Record<string, unknown>;
-  const secret = (sub.signingSecret as string)?.trim();
-  if (!secret) {
-    throw new Error("MissingSigningSecret");
-  }
-  return secret;
-}
-
-/**
- * Verifies the webhook signature from the bundle; throws on failure.
- */
-export function assertValidSignature(z: ZObject, bundle: Bundle): void {
-  const headers = (bundle.rawRequest?.headers ?? {}) as Record<string, string>;
-  const rawBody = bundle.rawRequest?.content ?? "";
-  let signingSecret: string;
-  try {
-    signingSecret = getSigningSecret(bundle);
-  } catch {
-    throw new z.errors.Error(
-      "Signing secret not found. Try turning the Zap off and on again to re-register the webhook.",
-      "MissingSigningSecret",
-      403,
-    );
-  }
-  const sig =
-    headers["x-photon-signature"] ?? headers["X-Photon-Signature"];
-  const ts = headers["x-photon-timestamp"] ?? headers["X-Photon-Timestamp"];
-  if (!verifySignature(rawBody, signingSecret, sig, ts)) {
-    throw new z.errors.Error(
-      "Invalid or missing webhook signature. Try turning the Zap off and on again to get a fresh signing secret.",
-      "SignatureError",
-      403,
-    );
-  }
-}
-
-/**
- * Creates a webhook perform function that verifies the HMAC-SHA256 signature,
- * filters for a specific event, and maps the payload using the provided
- * transform function.
+ * Creates a webhook perform function that filters for a specific event
+ * and maps the payload using the provided transform function.
+ * An optional predicate can drop events before they reach the Zap actions.
  */
 export function makePerform<T extends Record<string, unknown>>(
   eventName: string,
   transform: (data: Record<string, unknown>) => T,
+  filter?: (data: Record<string, unknown>) => boolean,
 ) {
   return async (z: ZObject, bundle: Bundle): Promise<T[]> => {
-    assertValidSignature(z, bundle);
-
     const payload = bundle.cleanedRequest as {
       event?: string;
       data?: Record<string, unknown>;
     };
 
     if (!payload?.data || payload.event !== eventName) {
-      return [];
+      throw new z.errors.HaltedError(
+        `Ignoring event "${payload?.event ?? "none"}" (expected "${eventName}")`,
+      );
+    }
+
+    if (filter && !filter(payload.data)) {
+      throw new z.errors.HaltedError("Event filtered out");
     }
 
     return [transform(payload.data)];

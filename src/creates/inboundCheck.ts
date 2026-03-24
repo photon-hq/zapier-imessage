@@ -1,6 +1,27 @@
 import type { ZObject, Bundle } from "zapier-platform-core";
 import { normalizeUrl } from "../authentication.js";
 
+/**
+ * Normalizes a user-supplied chat identifier into a proper chatGuid.
+ * - Plain phone/email → `iMessage;-;<address>`
+ * - `any;-;<address>` → `iMessage;-;<address>` (avoids server picking a group)
+ * - Already-qualified GUIDs (iMessage;-;, SMS;-;, iMessage;+;) pass through.
+ */
+export function normalizeChatGuid(input: string): string {
+  const trimmed = (input || "").trim();
+  if (!trimmed) return trimmed;
+
+  if (!trimmed.includes(";")) {
+    return `iMessage;-;${trimmed}`;
+  }
+
+  if (trimmed.startsWith("any;-;")) {
+    return `iMessage;-;${trimmed.slice(6)}`;
+  }
+
+  return trimmed;
+}
+
 const POLICY_ERROR =
   "Photon Inbound-First Policy: No prior conversation found for this chat. " +
   "You can only send to conversations that already exist on your server. " +

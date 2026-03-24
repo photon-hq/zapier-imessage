@@ -3,7 +3,7 @@ import {
   defineInputFields,
   type CreatePerform,
 } from "zapier-platform-core";
-import { requireInboundMessage } from "./inboundCheck.js";
+import { requireInboundMessage, normalizeChatGuid } from "./inboundCheck.js";
 
 const inputFields = defineInputFields([
   {
@@ -24,19 +24,20 @@ const inputFields = defineInputFields([
 ]);
 
 const perform = (async (z, bundle) => {
-  await requireInboundMessage(z, bundle, bundle.inputData.chatGuid);
+  const chatGuid = normalizeChatGuid(bundle.inputData.chatGuid as string);
+  await requireInboundMessage(z, bundle, chatGuid);
   const response = await z.request({
-    url: `${bundle.authData.serverUrl}/api/v1/chat/${encodeURIComponent(bundle.inputData.chatGuid)}/participant/add`,
+    url: `${bundle.authData.serverUrl}/api/v1/chat/${encodeURIComponent(chatGuid)}/participant/add`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: { address: bundle.inputData.address },
   });
 
   const data = response.data as Record<string, unknown>;
-  const id = (data.id ?? data.ID ?? `${bundle.inputData.chatGuid}-${bundle.inputData.address}`) as string;
+  const id = (data.id ?? data.ID ?? `${chatGuid}-${bundle.inputData.address}`) as string;
   const status = (data.status ?? data.Status ?? 200) as number;
   const message = (data.message ?? data.Message ?? "Success") as string;
-  return { id, status, message, chatGuid: bundle.inputData.chatGuid, address: bundle.inputData.address, ...data };
+  return { id, status, message, chatGuid, address: bundle.inputData.address, ...data };
 }) satisfies CreatePerform<typeof inputFields>;
 
 export default defineCreate({
