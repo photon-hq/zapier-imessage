@@ -1,25 +1,40 @@
-import {
-  defineTrigger,
-  type WebhookTriggerPerformList,
-} from "zapier-platform-core";
+import { defineTrigger } from "zapier-platform-core";
+import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
+import { normalizeUrl } from "../authentication.js";
 
-const perform = makePerform("new-message", (msg) => ({
-  id: (msg.guid as string) || `hook-${Date.now()}`,
-  guid: msg.guid,
-  text: msg.text,
-  sender:
-    (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
-  dateCreated: msg.dateCreated,
-  isFromMe: msg.isFromMe ?? false,
-  hasAttachments: Array.isArray(msg.attachments)
-    ? msg.attachments.length > 0
-    : false,
-}), (msg) => !msg.isFromMe);
+function transformMessage(msg: Record<string, unknown>) {
+  return {
+    id: (msg.guid as string) || `hook-${Date.now()}`,
+    guid: msg.guid,
+    text: msg.text,
+    sender:
+      (msg.handle as Record<string, unknown>)?.address ?? msg.senderAddress,
+    dateCreated: msg.dateCreated,
+    isFromMe: msg.isFromMe ?? false,
+  };
+}
 
-const performList = (async () => {
-  return [];
-}) satisfies WebhookTriggerPerformList;
+const perform = makePerform(
+  "new-message",
+  transformMessage,
+  (msg) => !msg.isFromMe,
+);
+
+const performList = async (z: ZObject, bundle: Bundle) => {
+  const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  const resp = await z.request({
+    url: `${baseUrl}/api/v1/message/query`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ limit: 1, sort: "desc" }),
+    skipThrowForStatus: true,
+  });
+
+  if (resp.status !== 200 || !Array.isArray(resp.data)) return [];
+
+  return (resp.data as Array<Record<string, unknown>>).map(transformMessage);
+};
 
 export default defineTrigger({
   key: "new_message_instant",
@@ -45,7 +60,6 @@ export default defineTrigger({
       sender: "+11234567890",
       dateCreated: 1700000000000,
       isFromMe: false,
-      hasAttachments: false,
     },
     outputFields: [
       { key: "id", label: "ID" },
@@ -54,7 +68,6 @@ export default defineTrigger({
       { key: "sender", label: "Sender" },
       { key: "dateCreated", label: "Date", type: "integer" },
       { key: "isFromMe", label: "Is From Me", type: "boolean" },
-      { key: "hasAttachments", label: "Has Attachments", type: "boolean" },
     ],
   },
 });

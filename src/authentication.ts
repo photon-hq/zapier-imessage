@@ -49,8 +49,20 @@ export const addApiKeyToHeader: BeforeRequestMiddleware = (
 /**
  * Auth test: validate Endpoint + API Key against the Photon server.
  */
+const requireHttps = (url: string, z: ZObject): void => {
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:") {
+    throw new z.errors.Error(
+      "Endpoint must use HTTPS (e.g. https://yourserver.imsgd.photon.codes).",
+      "InvalidData",
+      400,
+    );
+  }
+};
+
 const authTest = async (z: ZObject, bundle: Bundle) => {
   const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  requireHttps(baseUrl, z);
 
   const response = await z.request({
     url: `${baseUrl}/api/v1/server/info`,
