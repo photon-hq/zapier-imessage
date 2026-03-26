@@ -23,20 +23,34 @@ const perform = makePerform(
 
 const performList = async (z: ZObject, bundle: Bundle) => {
   const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
-  const resp = await z.request<{
-    data?: Array<Record<string, unknown>>;
-  }>({
-    url: `${baseUrl}/api/v1/message/query`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: { limit: 1 },
-    skipThrowForStatus: true,
-  });
 
-  if (resp.status !== 200) return [];
+  try {
+    const chatResp = await z.request<{
+      data?: Array<{ guid: string }>;
+    }>({
+      url: `${baseUrl}/api/v1/chat/query`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: { limit: 1, sort: "lastmessage" },
+    });
 
-  const messages = resp.data?.data ?? [];
-  return messages.map(transformMessage);
+    const chats = chatResp.data?.data ?? [];
+    if (chats.length === 0) return [];
+
+    const msgResp = await z.request<{
+      data?: Array<Record<string, unknown>>;
+    }>({
+      url: `${baseUrl}/api/v1/message/query`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: { chatGuid: chats[0]!.guid, limit: 1, sort: "DESC" },
+    });
+
+    const messages = msgResp.data?.data ?? [];
+    return messages.map(transformMessage);
+  } catch {
+    return [];
+  }
 };
 
 export default defineTrigger({

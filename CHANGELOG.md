@@ -1,3 +1,7 @@
+## 3.0.18
+
+- Fix trigger/new_message_instant performList: query recent chat first, then fetch message from it (API requires chatGuid for message queries)
+
 ## 3.0.17
 
 - Fix trigger/new_message_instant performList: remove unsupported sort param and fix response parsing (data nested under resp.data.data)
