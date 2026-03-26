@@ -1,3 +1,7 @@
+## 3.0.17
+
+- Fix trigger/new_message_instant performList: remove unsupported sort param and fix response parsing (data nested under resp.data.data)
+
 ## 3.0.16
 
 - Fix trigger/new_message_instant performList sort parameter (uppercase "DESC")

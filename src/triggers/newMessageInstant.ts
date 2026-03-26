@@ -23,17 +23,20 @@ const perform = makePerform(
 
 const performList = async (z: ZObject, bundle: Bundle) => {
   const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
-  const resp = await z.request({
+  const resp = await z.request<{
+    data?: Array<Record<string, unknown>>;
+  }>({
     url: `${baseUrl}/api/v1/message/query`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit: 1, sort: "DESC" }),
+    body: { limit: 1 },
     skipThrowForStatus: true,
   });
 
-  if (resp.status !== 200 || !Array.isArray(resp.data)) return [];
+  if (resp.status !== 200) return [];
 
-  return (resp.data as Array<Record<string, unknown>>).map(transformMessage);
+  const messages = resp.data?.data ?? [];
+  return messages.map(transformMessage);
 };
 
 export default defineTrigger({
