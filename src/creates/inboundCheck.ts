@@ -113,20 +113,17 @@ async function chatExistsOnServer(
   );
 }
 
-/**
- * Inbound-first policy disabled: allow all sends. Re-enable by uncommenting
- * the checks below and removing the immediate return.
- */
 export async function requireInboundMessage(
-  _z: ZObject,
-  _bundle: Bundle,
-  _chatGuid: string,
+  z: ZObject,
+  bundle: Bundle,
+  chatGuid: string,
 ): Promise<void> {
-  return;
-  // const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
-  // if (await hasAnyMessages(z, serverUrl, chatGuid)) return;
-  // if (await chatExistsOnServer(z, serverUrl, chatGuid)) return;
-  // throw new z.errors.Error(POLICY_ERROR, "InboundFirstPolicy");
+  if (chatGuid.includes(";+;")) return;
+
+  const serverUrl = normalizeUrl(bundle.authData.serverUrl as string);
+  if (await hasAnyMessages(z, serverUrl, chatGuid)) return;
+  if (await chatExistsOnServer(z, serverUrl, chatGuid)) return;
+  throw new z.errors.Error(POLICY_ERROR, "InboundFirstPolicy");
 }
 
 /**
