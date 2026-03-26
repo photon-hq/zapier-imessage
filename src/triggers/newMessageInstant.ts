@@ -1,7 +1,5 @@
 import { defineTrigger } from "zapier-platform-core";
-import type { ZObject, Bundle } from "zapier-platform-core";
 import { subscribe, unsubscribe, makePerform } from "./webhookHelpers.js";
-import { normalizeUrl } from "../authentication.js";
 
 function transformMessage(msg: Record<string, unknown>) {
   return {
@@ -21,37 +19,7 @@ const perform = makePerform(
   (msg) => !msg.isFromMe,
 );
 
-const performList = async (z: ZObject, bundle: Bundle) => {
-  const baseUrl = normalizeUrl(bundle.authData.serverUrl as string);
-
-  try {
-    const chatResp = await z.request<{
-      data?: Array<{ guid: string }>;
-    }>({
-      url: `${baseUrl}/api/v1/chat/query`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: { limit: 1, sort: "lastmessage" },
-    });
-
-    const chats = chatResp.data?.data ?? [];
-    if (chats.length === 0) return [];
-
-    const msgResp = await z.request<{
-      data?: Array<Record<string, unknown>>;
-    }>({
-      url: `${baseUrl}/api/v1/message/query`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: { chatGuid: chats[0]!.guid, limit: 1, sort: "DESC" },
-    });
-
-    const messages = msgResp.data?.data ?? [];
-    return messages.map(transformMessage);
-  } catch {
-    return [];
-  }
-};
+const performList = async () => [];
 
 export default defineTrigger({
   key: "new_message_instant",

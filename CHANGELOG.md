@@ -1,3 +1,7 @@
+## 3.0.19
+
+- Fix trigger/new_message_instant performList: return empty to avoid API compatibility issues (webhook delivers real data)
+
 ## 3.0.18
 
 - Fix trigger/new_message_instant performList: query recent chat first, then fetch message from it (API requires chatGuid for message queries)
