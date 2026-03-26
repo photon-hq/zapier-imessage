@@ -27,7 +27,7 @@ const performList = async (z: ZObject, bundle: Bundle) => {
     url: `${baseUrl}/api/v1/message/query`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit: 1, sort: "desc" }),
+    body: JSON.stringify({ limit: 1, sort: "DESC" }),
     skipThrowForStatus: true,
   });
 

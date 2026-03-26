@@ -1,3 +1,7 @@
+## 3.0.16
+
+- Fix trigger/new_message_instant performList sort parameter (uppercase "DESC")
+
 ## 3.0.15
 
 - Enable inbound-first policy to prevent outbound spam on create/send_message, create/send_attachment, and create/schedule_message
